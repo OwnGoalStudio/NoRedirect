@@ -123,7 +123,7 @@ void NoRedirectBatchKillAll(NSArray<NSString *> *processNames, BOOL softly) {
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.section == 2) {
+    if (indexPath.section == 1) {
         PSSpecifier *specifier = [self specifierAtIndexPath:indexPath];
         NSString *key = [specifier propertyForKey:@"cell"];
         if ([key isEqualToString:@"PSButtonCell"]) {

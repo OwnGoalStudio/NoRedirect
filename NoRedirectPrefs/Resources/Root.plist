@@ -55,6 +55,7 @@
 			<key>highlightSearchText</key>
 			<true/>
 		</dict>
+<!--
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
@@ -85,6 +86,7 @@
 			<key>label</key>
 			<string>Redirect History</string>
 		</dict>
+-->
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
