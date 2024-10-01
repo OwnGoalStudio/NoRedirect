@@ -43,6 +43,8 @@
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>Advanced</string>
+			<key>footerText</key>
+			<string>Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -55,8 +57,6 @@
 			<string>ShouldSimulateSuccess</string>
 			<key>label</key>
 			<string>Simulate Handled Request</string>
-			<key>footerText</key>
-			<string>Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL.</string>
 			<key>PostNotification</key>
 			<string>com.82flex.noredirectprefs/saved</string>
 		</dict>
