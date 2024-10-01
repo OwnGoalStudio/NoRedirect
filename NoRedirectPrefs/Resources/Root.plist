@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>General</string>
+			<key>footerText</key>
+			<string>This tweak is designed to prevent redirections from Safari, Chrome, and other apps to the App Store, Safari, and other apps.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsEnabled</string>
+			<key>label</key>
+			<string>Enabled</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>detail</key>
+			<string>NoRedirectAppListController</string>
+			<key>subcontrollerClass</key>
+			<string>NoRedirectAppSpecificViewController</string>
+			<key>label</key>
+			<string>Application Settings</string>
+			<key>sections</key>
+			<array>
+				<dict>
+					<key>sectionType</key>
+					<string>User</string>
+				</dict>
+				<dict>
+					<key>sectionType</key>
+					<string>System</string>
+				</dict>
+			</array>
+			<key>showIdentifiersAsSubtitle</key>
+			<true/>
+			<key>useSearchBar</key>
+			<true/>
+			<key>includeIdentifiersInSearch</key>
+			<true/>
+			<key>highlightSearchText</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>History</string>
+			<key>footerText</key>
+			<string>These records will be cleared each time you reboot your device.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsRecordingEnabled</string>
+			<key>label</key>
+			<string>Allow Recording</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>detail</key>
+			<string>NoRedirectHistoryViewController</string>
+			<key>label</key>
+			<string>Redirect History</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string></string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Reset All…</string>
+			<key>action</key>
+			<string>resetAll</string>
+			<key>confirmation</key>
+			<dict>
+				<key>title</key>
+				<string>Reset</string>
+				<key>prompt</key>
+				<string>Are you sure you want to reset all settings?</string>
+				<key>okTitle</key>
+				<string>Reset</string>
+				<key>cancelTitle</key>
+				<string>Cancel</string>
+			</dict>
+			<key>isDestructive</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string></string>
+			<key>footerText</key>
+			<string>Please support our paid works, thank you!</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Made with ♥ by OwnGoal Studio</string>
+			<key>action</key>
+			<string>support</string>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>No Redirect</string>
+</dict>
+</plist>

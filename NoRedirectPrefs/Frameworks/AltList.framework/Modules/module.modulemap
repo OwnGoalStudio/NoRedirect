@@ -1,0 +1,6 @@
+framework module AltList {
+  umbrella header "AltList.h"
+
+  export *
+  module * { export * }
+}

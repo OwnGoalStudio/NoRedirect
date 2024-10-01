@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>items</key>
+	<array>
+        <dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>General</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsBlockedFromLaunchingOthers</string>
+			<key>label</key>
+			<string>Block from Launching Others</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsBlockedFromBeingLaunched</string>
+			<key>label</key>
+			<string>Block from Being Launched</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Advanced</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>ShouldSimulateSuccess</string>
+			<key>label</key>
+			<string>Simulate Handled Request</string>
+			<key>footerText</key>
+			<string>Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL.</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Common Blocks</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsBlockedFromLaunchingAppStore</string>
+			<key>label</key>
+			<string>App Store</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsBlockedFromLaunchingSafari</string>
+			<key>label</key>
+			<string>Safari</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Custom Blocks</string>
+			<key>key</key>
+			<string>GroupCustomBlocks</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Add Custom Block…</string>
+			<key>action</key>
+			<string>addCustomBlock</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Custom Bypasses</string>
+			<key>key</key>
+			<string>GroupCustomBypasses</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Add Custom Bypass…</string>
+			<key>action</key>
+			<string>addCustomBypass</string>
+		</dict>
+    </array>
+</dict>
+</plist>

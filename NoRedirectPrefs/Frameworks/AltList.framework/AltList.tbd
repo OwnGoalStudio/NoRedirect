@@ -1,0 +1,66 @@
+--- !tapi-tbd-v2
+archs:                 [ arm64, arm64e ]
+uuids:                 [ 'arm64: 5A5E5A01-3F7A-344A-884A-E7051F38DA03' ]
+platform:              ios
+flags:                 [ flat_namespace, not_app_extension_safe ]
+install-name:          "@rpath/AltList.framework/AltList"
+current-version:       0
+compatibility-version: 0
+objc-constraint:       retain_release
+exports:
+  - archs:                [ arm64, arm64e ]
+    symbols:              [ _safe_getExecutablePath, _tagArrayContainsTag ]
+    objc-classes:         [ _ATLApplicationListControllerBase,
+                            _ATLApplicationListMultiSelectionController,
+                            _ATLApplicationListSelectionController,
+                            _ATLApplicationListSubcontroller,
+                            _ATLApplicationListSubcontrollerController,
+                            _ATLApplicationSection, _ATLApplicationSelectionCell,
+                            _ATLApplicationSubtitleCell,
+                            _ATLApplicationSubtitleSwitchCell ]
+    objc-ivars:           [ _ATLApplicationListControllerBase._allSpecifiers,
+                            _ATLApplicationListControllerBase._altListBundle,
+                            _ATLApplicationListControllerBase._applicationSections,
+                            _ATLApplicationListControllerBase._iconLoadQueue,
+                            _ATLApplicationListControllerBase._isPopulated,
+                            _ATLApplicationListControllerBase._isReloadingSpecifiers,
+                            _ATLApplicationListControllerBase._placeholderAppIcon,
+                            _ATLApplicationListControllerBase._searchController,
+                            _ATLApplicationListControllerBase._searchKey,
+                            _ATLApplicationListControllerBase._specifiersByLetter,
+                            _ATLApplicationListMultiSelectionController._defaultApplicationSwitchValue,
+                            _ATLApplicationListMultiSelectionController._selectedApplications,
+                            _ATLApplicationListSelectionController._selectedApplicationID,
+                            _ATLApplicationSubtitleCell._customValueLabel ]
+undefineds:
+  - archs:                [ arm64, arm64e ]
+    symbols:              [ _NSClassFromString, _UIFontTextStyleBody,
+                            __Block_object_assign, __Block_object_dispose,
+                            __NSConcreteGlobalBlock, __NSConcreteStackBlock,
+                            __NSGetExecutablePath, __Unwind_Resume,
+                            ___CFConstantStringClassReference, ___kCFBooleanTrue,
+                            ___objc_personality_v0, ___stack_chk_fail,
+                            ___stack_chk_guard, __dispatch_main_q,
+                            __objc_empty_cache, _dispatch_async,
+                            _dispatch_get_global_queue,
+                            _dispatch_queue_attr_make_with_qos_class,
+                            _dispatch_queue_create, _objc_alloc,
+                            _objc_autoreleaseReturnValue, _objc_msgSend,
+                            _objc_msgSendSuper2, _objc_opt_class,
+                            _objc_opt_isKindOfClass, _objc_opt_new,
+                            _objc_opt_respondsToSelector, _objc_release,
+                            _objc_retain, _objc_retainAutoreleaseReturnValue,
+                            _objc_retainAutoreleasedReturnValue,
+                            _objc_storeStrong,
+                            _objc_unsafeClaimAutoreleasedReturnValue ]
+    objc-classes:         [ _LSApplicationProxy, _LSApplicationWorkspace, _NSArray,
+                            _NSBundle, _NSCharacterSet, _NSDictionary, _NSLocale,
+                            _NSMutableArray, _NSMutableDictionary, _NSMutableSet,
+                            _NSNumber, _NSObject, _NSPredicate, _NSSortDescriptor,
+                            _NSString, _PSListController, _PSSpecifier,
+                            _PSSwitchTableCell, _PSTableCell, _UIApplication,
+                            _UIColor, _UIFont, _UIImage, _UILabel, _UIScreen,
+                            _UISearchController ]
+    objc-ivars:           [ _PSListController._specifiers, _PSSpecifier.getter,
+                            _PSSpecifier.setter, _PSSpecifier.target ]
+...
