@@ -67,7 +67,7 @@
                     cachedProxies[record.source] = srcProxy;
                 }
             }
-            if (!srcProxy || srcProxy.atl_isHidden) {
+            if (!srcProxy || srcProxy.atl_isHidden || !srcProxy.atl_nameToDisplay) {
                 continue;
             }
 
@@ -78,7 +78,7 @@
                     cachedProxies[record.target] = targetProxy;
                 }
             }
-            if (!targetProxy || targetProxy.atl_isHidden) {
+            if (!targetProxy || targetProxy.atl_isHidden || !targetProxy.atl_nameToDisplay) {
                 continue;
             }
 
