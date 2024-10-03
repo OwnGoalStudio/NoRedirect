@@ -11,5 +11,6 @@
 + (NSArray<NoRedirectRecord *> *)allRecords;
 + (void)insertRecord:(BOOL)declined source:(NSString *)sourceIdentifier target:(NSString *)targetIdentifier;
 + (void)clearAllRecordsBeforeBoot;
++ (void)clearAllRecords;
 
 @end

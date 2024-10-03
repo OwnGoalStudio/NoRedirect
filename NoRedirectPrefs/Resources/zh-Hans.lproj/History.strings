@@ -1,3 +1,7 @@
 "Are you sure you want to clear the redirect history?" = "你确定要清除重定向历史记录吗？";
 
 "Clear" = "清除";
+
+"Declined on %@" = "拦截于 %@";
+
+"Redirected on %@" = "重定向于 %@";

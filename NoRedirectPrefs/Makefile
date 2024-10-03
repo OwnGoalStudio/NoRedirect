@@ -17,7 +17,10 @@ NoRedirectPrefs_FILES += NoRedirectAppListController.m
 NoRedirectPrefs_FILES += NoRedirectAppSpecificViewController.m
 NoRedirectPrefs_FILES += NoRedirectAppSelectionViewController.m
 NoRedirectPrefs_FILES += NoRedirectHistoryViewController.m
+NoRedirectPrefs_FILES += ../NoRedirectRecord.m
+
 NoRedirectPrefs_CFLAGS += -fobjc-arc
+NoRedirectPrefs_CFLAGS += -I..
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),1)
 NoRedirectPrefs_CFLAGS += -FFrameworks/Simulator

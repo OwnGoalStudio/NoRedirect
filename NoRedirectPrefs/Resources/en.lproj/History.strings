@@ -1,3 +1,7 @@
 "Are you sure you want to clear the redirect history?" = "Are you sure you want to clear the redirect history?";
 
 "Clear" = "Clear";
+
+"Declined on %@" = "Declined on %@";
+
+"Redirected on %@" = "Redirected on %@";

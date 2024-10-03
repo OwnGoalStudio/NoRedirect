@@ -1,5 +1,5 @@
+#import <AltList/AltList.h>
 #import <Preferences/PSListController.h>
 
-@interface NoRedirectHistoryViewController : PSListController
-
+@interface NoRedirectHistoryViewController : ATLApplicationListControllerBase
 @end

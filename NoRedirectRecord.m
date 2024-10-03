@@ -46,12 +46,16 @@
     NSMutableArray<NoRedirectRecord *> *records = [NSMutableArray array];
     sqlite3 *db = [self sharedDatabase];
     sqlite3_stmt *stmt;
-    if (sqlite3_prepare_v2(db, "SELECT * FROM records ORDER BY created_at DESC;", -1, &stmt, NULL) == SQLITE_OK) {
+    if (sqlite3_prepare_v2(db, "SELECT * FROM records ORDER BY id DESC;", -1, &stmt, NULL) == SQLITE_OK) {
         while (sqlite3_step(stmt) == SQLITE_ROW) {
             NoRedirectRecord *record = [[NoRedirectRecord alloc] init];
             record->_declined = (BOOL)sqlite3_column_int(stmt, 1);
-            record->_source = [NSString stringWithUTF8String:(const char *)sqlite3_column_text(stmt, 2)];
-            record->_target = [NSString stringWithUTF8String:(const char *)sqlite3_column_text(stmt, 3)];
+            const char *source = (const char *)sqlite3_column_text(stmt, 2);
+            if (source)
+                record->_source = [NSString stringWithUTF8String:source];
+            const char *target = (const char *)sqlite3_column_text(stmt, 3);
+            if (target)
+                record->_target = [NSString stringWithUTF8String:target];
             record->_createdAt = [NSDate dateWithTimeIntervalSince1970:sqlite3_column_int(stmt, 4)];
             [records addObject:record];
         }
@@ -84,6 +88,19 @@
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, "DELETE FROM records WHERE created_at < ?;", -1, &stmt, NULL) == SQLITE_OK) {
         sqlite3_bind_int(stmt, 1, (int)bootTime);
+        if (sqlite3_step(stmt) != SQLITE_DONE) {
+            HBLogError(@"Failed to delete records: %s", sqlite3_errmsg(db));
+        }
+        sqlite3_finalize(stmt);
+    } else {
+        HBLogError(@"Failed to prepare statement: %s", sqlite3_errmsg(db));
+    }
+}
+
++ (void)clearAllRecords {
+    sqlite3 *db = [self sharedDatabase];
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, "DELETE FROM records;", -1, &stmt, NULL) == SQLITE_OK) {
         if (sqlite3_step(stmt) != SQLITE_DONE) {
             HBLogError(@"Failed to delete records: %s", sqlite3_errmsg(db));
         }
