@@ -1,16 +1,31 @@
-"General" = "General";
-"Enabled" = "Enabled";
-"Please support our paid works, thank you!" = "Please support our paid works, thank you!";
-"Made with ♥ by OwnGoal Studio" = "Made with ♥ by OwnGoal Studio";
-"No Redirect" = "No Redirect";
-"Application Settings" = "Application Settings";
-"This tweak is designed to prevent redirections from Safari, Chrome, and other apps to the App Store, Safari, and other apps." = "This tweak is designed to prevent redirections from Safari, Chrome, and other apps to the App Store, Safari, and other apps.";
-"Redirect History" = "Redirect History";
-"These records will be cleared each time you reboot your device." = "These records will be cleared each time you reboot your device.";
-"Reset All…" = "Reset All…";
-"Reset All" = "Reset All";
-"Are you sure you want to reset all settings?" = "Are you sure you want to reset all settings?";
-"Reset" = "Reset";
-"Cancel" = "Cancel";
-"History" = "History";
 "Allow Recording" = "Allow Recording";
+
+"Application Settings" = "Application Settings";
+
+"Are you sure you want to reset all settings?" = "Are you sure you want to reset all settings?";
+
+"Cancel" = "Cancel";
+
+"Enabled" = "Enabled";
+
+"General" = "General";
+
+"History" = "History";
+
+"Made with ♥ by OwnGoal Studio" = "Made with ♥ by OwnGoal Studio";
+
+"No Redirect" = "No Redirect";
+
+"Please support our paid works, thank you!" = "Please support our paid works, thank you!";
+
+"Redirect History" = "Redirect History";
+
+"Reset" = "Reset";
+
+"Reset All" = "Reset All";
+
+"Reset All…" = "Reset All…";
+
+"These records will be cleared each time you reboot your device." = "These records will be cleared each time you reboot your device.";
+
+"This tweak is designed to prevent redirections from Safari, Chrome, and other apps to the App Store, Safari, and other apps." = "This tweak is designed to prevent redirections from Safari, Chrome, and other apps to the App Store, Safari, and other apps.";

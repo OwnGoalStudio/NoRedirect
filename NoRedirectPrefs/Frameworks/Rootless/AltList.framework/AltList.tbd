@@ -3,7 +3,7 @@ archs:                 [ arm64, arm64e ]
 uuids:                 [ 'arm64: 5A5E5A01-3F7A-344A-884A-E7051F38DA03' ]
 platform:              ios
 flags:                 [ flat_namespace, not_app_extension_safe ]
-install-name:          "/Library/Frameworks/AltList.framework/AltList"
+install-name:          "@rpath/AltList.framework/AltList"
 current-version:       0
 compatibility-version: 0
 objc-constraint:       retain_release

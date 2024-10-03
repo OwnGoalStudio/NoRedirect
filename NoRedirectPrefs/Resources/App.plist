@@ -42,7 +42,29 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>Advanced</string>
+			<string>Cancellation</string>
+			<key>footerText</key>
+			<string>Cancel all blocks automatically in 10 seconds after application becoming active.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>ShouldTeardownAutomatically</string>
+			<key>label</key>
+			<string>Delayed Cancellation</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Simulation</string>
 			<key>footerText</key>
 			<string>Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL.</string>
 		</dict>

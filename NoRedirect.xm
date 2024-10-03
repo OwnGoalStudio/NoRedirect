@@ -177,6 +177,14 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
         return NO;
     }
 
+    if ([srcId hasPrefix:@"com.apple."]) {
+        BOOL isSafariViewService = [srcId isEqualToString:@"com.apple.mobilesafari"] || [srcId isEqualToString:@"com.apple.SafariViewService"];
+        if (!isSafariViewService) {
+            HBLogDebug(@"-> %@ is a system application except Safari View Service", srcId);
+            return NO;
+        }
+    }
+
     NSString *mapping = [NSString stringWithFormat:@"%@->%@", srcId, destId];
     if ([gCustomAllowedMappings containsObject:mapping]) {
         HBLogDebug(@"-> Custom mapping %@ is allowed", mapping);
@@ -199,7 +207,7 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
     }
 
     if (([destId isEqualToString:@"com.apple.mobilesafari"] || [destId isEqualToString:@"com.apple.SafariViewService"]) && [gForbiddenLaunchSourcesForSafariServices containsObject:srcId]) {
-        HBLogDebug(@"-> %@ is forbidden from launching Safari Services", srcId);
+        HBLogDebug(@"-> %@ is forbidden from launching Safari View Service", srcId);
         return YES;
     }
 
@@ -223,6 +231,10 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
 %hook SBMainWorkspace
 
 - (BOOL)_canExecuteTransitionRequest:(id)arg1 forExecution:(BOOL)arg2 {
+    if (!gEnabled) {
+        return %orig;
+    }
+
     HBLogDebug(@"Checking if transition request can be executed: %@", arg1);
 
     if (![arg1 isKindOfClass:%c(SBMainWorkspaceTransitionRequest)]) {

@@ -20,12 +20,17 @@ NoRedirectPrefs_FILES += NoRedirectHistoryViewController.m
 NoRedirectPrefs_CFLAGS += -fobjc-arc
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),1)
-NoRedirectPrefs_CFLAGS += -FFrameworks/_Simulator
-NoRedirectPrefs_LDFLAGS += -FFrameworks/_Simulator
+NoRedirectPrefs_CFLAGS += -FFrameworks/Simulator
+NoRedirectPrefs_LDFLAGS += -FFrameworks/Simulator
 NoRedirectPrefs_LDFLAGS += -rpath /opt/simject
+else
+ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
+NoRedirectPrefs_CFLAGS += -FFrameworks/Rootless
+NoRedirectPrefs_LDFLAGS += -FFrameworks/Rootless
 else
 NoRedirectPrefs_CFLAGS += -FFrameworks
 NoRedirectPrefs_LDFLAGS += -FFrameworks
+endif
 endif
 
 NoRedirectPrefs_FRAMEWORKS += UIKit

@@ -1,26 +1,59 @@
-"General" = "General";
-"Block from Launching Others" = "Block from Launching Others";
-"Block from Being Launched" = "Block from Being Launched";
-"Common Blocks" = "Common Blocks";
-"App Store" = "App Store";
-"Safari" = "Safari";
-"Custom Blocks" = "Custom Blocks";
-"Custom Bypasses" = "Custom Bypasses";
-"Add Custom Block…" = "Add Custom Block…";
-"Edit Custom Block…" = "Edit Custom Block…";
-"Add Custom Bypass…" = "Add Custom Bypass…";
-"Edit Custom Bypass…" = "Edit Custom Bypass…";
-"Cancel" = "Cancel";
-"Save" = "Save";
-"Block Applications" = "Block Applications";
-"“%@” is blocked from launching %@." = "“%@” is blocked from launching %@.";
-"“%@” is always allowed to be launched by %@. These rules have the highest priority." = "“%@” is always allowed to be launched by %@. These rules have the highest priority.";
-"“%@”" = "“%@”";
-"“%@” and “%@”" = "“%@” and “%@”";
-"“%@”, “%@” and %@" = "“%@”, “%@” and %@";
 "%lu other application" = "%lu other application";
+
 "%lu other applications" = "%lu other applications";
-"Modified" = "Modified";
+
+"Add Custom Block…" = "Add Custom Block…";
+
+"Add Custom Bypass…" = "Add Custom Bypass…";
+
 "Advanced" = "Advanced";
+
+"App Store" = "App Store";
+
+"Block Applications" = "Block Applications";
+
+"Block from Being Launched" = "Block from Being Launched";
+
+"Block from Launching Others" = "Block from Launching Others";
+
+"Cancel" = "Cancel";
+
+"Cancel all blocks automatically in 10 seconds after application becoming active." = "Cancel all blocks automatically in 10 seconds after application becoming active.";
+
+"Cancellation" = "Cancellation";
+
+"Common Blocks" = "Common Blocks";
+
+"Custom Blocks" = "Custom Blocks";
+
+"Custom Bypasses" = "Custom Bypasses";
+
+"Delayed Cancellation" = "Delayed Cancellation";
+
+"Edit Custom Block…" = "Edit Custom Block…";
+
+"Edit Custom Bypass…" = "Edit Custom Bypass…";
+
+"General" = "General";
+
+"Modified" = "Modified";
+
+"Safari" = "Safari";
+
+"Save" = "Save";
+
 "Simulate Handled Request" = "Simulate Handled Request";
+
+"Simulation" = "Simulation";
+
 "Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL." = "Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL.";
+
+"“%@”" = "“%@”";
+
+"“%@” and “%@”" = "“%@” and “%@”";
+
+"“%@” is always allowed to be launched by %@. These rules have the highest priority." = "“%@” is always allowed to be launched by %@. These rules have the highest priority.";
+
+"“%@” is blocked from launching %@." = "“%@” is blocked from launching %@.";
+
+"“%@”, “%@” and %@" = "“%@”, “%@” and %@";

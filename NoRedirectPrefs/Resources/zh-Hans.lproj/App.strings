@@ -1,26 +1,59 @@
-"General" = "通用";
-"Block from Launching Others" = "禁止启动其他应用程序";
-"Block from Being Launched" = "禁止被其他应用程序启动";
-"Common Blocks" = "常用拦截";
-"App Store" = "App Store";
-"Safari" = "Safari 浏览器";
-"Custom Blocks" = "自定义拦截";
-"Custom Bypasses" = "自定义放行";
-"Add Custom Block…" = "添加自定义拦截项…";
-"Edit Custom Block…" = "编辑自定义拦截项…";
-"Add Custom Bypass…" = "添加自定义放行项…";
-"Edit Custom Bypass…" = "编辑自定义放行项…";
-"Cancel" = "取消";
-"Save" = "保存";
-"Block Applications" = "拦截应用程序";
-"“%@” is blocked from launching %@." = "“%@” 被禁止启动 %@。";
-"“%@” is always allowed to be launched by %@. These rules have the highest priority." = "“%@” 总是允许被 %@ 启动。这些规则具备最高优先级。";
-"“%@”" = "“%@”";
-"“%@” and “%@”" = "“%@” 和 “%@”";
-"“%@”, “%@” and %@" = "“%@”，“%@” 和 %@";
 "%lu other application" = "其他 %lu 个应用程序";
+
 "%lu other applications" = "其他 %lu 个应用程序";
-"Modified" = "已修改";
+
+"Add Custom Block…" = "添加自定义拦截项…";
+
+"Add Custom Bypass…" = "添加自定义放行项…";
+
 "Advanced" = "高级";
+
+"App Store" = "App Store";
+
+"Block Applications" = "拦截应用程序";
+
+"Block from Being Launched" = "禁止被其他应用程序启动";
+
+"Block from Launching Others" = "禁止启动其他应用程序";
+
+"Cancel" = "取消";
+
+"Cancel all blocks automatically in 10 seconds after application becoming active." = "应用程序进入前台 10 秒后自动取消所有拦截。";
+
+"Cancellation" = "解除";
+
+"Common Blocks" = "常用拦截";
+
+"Custom Blocks" = "自定义拦截";
+
+"Custom Bypasses" = "自定义放行";
+
+"Delayed Cancellation" = "延迟解除";
+
+"Edit Custom Block…" = "编辑自定义拦截项…";
+
+"Edit Custom Bypass…" = "编辑自定义放行项…";
+
+"General" = "通用";
+
+"Modified" = "已修改";
+
+"Safari" = "Safari 浏览器";
+
+"Save" = "保存";
+
 "Simulate Handled Request" = "模拟已处理请求";
+
+"Simulation" = "模拟";
+
 "Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL." = "告诉调用者重定向已成功处理。这可能导致调用者停止尝试其他备用方法来打开 URL。";
+
+"“%@”" = "“%@”";
+
+"“%@” and “%@”" = "“%@” 和 “%@”";
+
+"“%@” is always allowed to be launched by %@. These rules have the highest priority." = "“%@” 总是允许被 %@ 启动。这些规则具备最高优先级。";
+
+"“%@” is blocked from launching %@." = "“%@” 被禁止启动 %@。";
+
+"“%@”, “%@” and %@" = "“%@”，“%@” 和 %@";
