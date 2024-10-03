@@ -4,6 +4,7 @@
 #import <Preferences/PSSpecifier.h>
 #import <UIKit/UIKit.h>
 
+#import "LSApplicationProxy+AltList.h"
 #import "NoRedirectAppSelectionViewController.h"
 #import "NoRedirectAppSpecificViewController.h"
 
@@ -28,7 +29,7 @@
 - (NSString *)applicationName {
     if (!_applicationName) {
         LSApplicationProxy *appProxy = [LSApplicationProxy applicationProxyForIdentifier:self.applicationID];
-        _applicationName = appProxy.localizedName;
+        _applicationName = appProxy.atl_nameToDisplay;
     }
     return _applicationName ?: self.specifier.name;
 }

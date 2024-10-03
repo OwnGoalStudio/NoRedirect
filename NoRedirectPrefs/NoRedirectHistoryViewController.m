@@ -3,6 +3,7 @@
 #import <Preferences/PSSpecifier.h>
 #import <UIKit/UIKit.h>
 
+#import "LSApplicationProxy+AltList.h"
 #import "NoRedirectAppSpecificViewController.h"
 #import "NoRedirectHistoryViewController.h"
 #import "NoRedirectRecord.h"
@@ -16,7 +17,7 @@
 }
 
 - (PSCellType)cellTypeForApplicationCells {
-	return PSLinkListCell;
+    return PSLinkListCell;
 }
 
 - (Class)detailControllerClassForSpecifierOfApplicationProxy:(LSApplicationProxy *)applicationProxy {
@@ -66,7 +67,7 @@
                     cachedProxies[record.source] = srcProxy;
                 }
             }
-            if (!srcProxy || !srcProxy.localizedName) {
+            if (!srcProxy || srcProxy.atl_isHidden) {
                 continue;
             }
 
@@ -77,7 +78,7 @@
                     cachedProxies[record.target] = targetProxy;
                 }
             }
-            if (!targetProxy || !targetProxy.localizedName) {
+            if (!targetProxy || targetProxy.atl_isHidden) {
                 continue;
             }
 
@@ -87,7 +88,7 @@
             }
 
             specifier.name =
-                [NSString stringWithFormat:@"%@  ❯  %@", srcProxy.localizedName, targetProxy.localizedName];
+                [NSString stringWithFormat:@"%@  ❯  %@", srcProxy.atl_nameToDisplay, targetProxy.atl_nameToDisplay];
 
             [specifier setProperty:record forKey:@"associatedRecord"];
 
@@ -107,7 +108,8 @@
                 [specifiers addObject:dateSpecifier];
             }
 
-            specifier.identifier = [NSString stringWithFormat:@"%@-%@-%.0f", record.source, record.target, record.createdAt.timeIntervalSince1970];
+            specifier.identifier = [NSString
+                stringWithFormat:@"%@-%@-%.0f", record.source, record.target, record.createdAt.timeIntervalSince1970];
 
             [specifiers addObject:specifier];
         }
