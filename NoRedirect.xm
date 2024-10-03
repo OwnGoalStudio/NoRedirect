@@ -1,8 +1,7 @@
-#include <CoreFoundation/CoreFoundation.h>
-#include <Foundation/Foundation.h>
-#include <math.h>
-@import Foundation;
-@import UIKit;
+#import <CoreFoundation/CoreFoundation.h>
+#import <Foundation/Foundation.h>
+#import <math.h>
+#import <UIKit/UIKit.h>
 
 #import <libSandy.h>
 #import <HBLog.h>
