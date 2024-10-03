@@ -44,7 +44,7 @@
 			<key>label</key>
 			<string>Cancellation</string>
 			<key>footerText</key>
-			<string>Cancel all blocks automatically in 10 seconds after application becoming active.</string>
+			<string>Pause all blocks automatically in 10 seconds each time when application become active.</string>
 		</dict>
 		<dict>
 			<key>cell</key>

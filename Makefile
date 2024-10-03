@@ -1,4 +1,4 @@
-export PACKAGE_VERSION := 1.1
+export PACKAGE_VERSION := 1.2
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),1)
 TARGET := simulator:clang:latest:14.0

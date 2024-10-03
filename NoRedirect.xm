@@ -1,3 +1,6 @@
+#include <CoreFoundation/CoreFoundation.h>
+#include <Foundation/Foundation.h>
+#include <math.h>
 @import Foundation;
 @import UIKit;
 
@@ -61,11 +64,14 @@ static NSSet<NSString *> *gForbiddenLaunchDestinations = nil;
 static NSSet<NSString *> *gForbiddenLaunchSourcesForAppStore = nil;
 static NSSet<NSString *> *gForbiddenLaunchSourcesForSafariServices = nil;
 
+static NSSet<NSString *> *gUseLenientModeSources = nil;
 static NSSet<NSString *> *gUseHandledSimulationSources = nil;
 
 // %@->%@
 static NSSet<NSString *> *gCustomAllowedMappings = nil;
 static NSSet<NSString *> *gCustomForbiddenMappings = nil;
+
+static NSMutableDictionary<NSString *, NSNumber *> *gLastTransitionStamps = nil;
 
 static void ReloadPrefs(void) {
     static NSUserDefaults *prefs = nil;
@@ -153,6 +159,16 @@ static void ReloadPrefs(void) {
     gCustomForbiddenMappings = [customForbiddenMappings copy];
     HBLogDebug(@"Custom Forbidden Mappings: %@", customForbiddenMappings);
 
+    NSMutableSet *useLenientModeSources = [NSMutableSet set];
+    for (NSString *key in settings) {
+        if ([key hasPrefix:@"ShouldTeardownAutomatically/"] && [settings[key] boolValue]) {
+            NSString *appId = [key substringFromIndex:28];
+            [useLenientModeSources addObject:appId];
+        }
+    }
+    gUseLenientModeSources = [useLenientModeSources copy];
+    HBLogDebug(@"Use Lenient Mode Sources: %@", useLenientModeSources);
+
     NSMutableSet *useHandledSimulationSources = [NSMutableSet set];
     for (NSString *key in settings) {
         if ([key hasPrefix:@"ShouldSimulateSuccess/"] && [settings[key] boolValue]) {
@@ -168,55 +184,70 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
     HBLogDebug(@"Checking if %@ should be allowed to launch %@", srcId, destId);
 
     if (!srcId || !destId) {
-        HBLogError(@"-> Invalid source or destination");
+        HBLogError(@"> [ACCEPT] Invalid source or destination");
         return NO;
     }
 
     if (!gEnabled) {
-        HBLogDebug(@"-> NoRedirect is disabled");
+        HBLogDebug(@"> [ACCEPT] NoRedirect is disabled");
         return NO;
     }
 
-    if ([srcId hasPrefix:@"com.apple."]) {
-        BOOL isSafariViewService = [srcId isEqualToString:@"com.apple.mobilesafari"] || [srcId isEqualToString:@"com.apple.SafariViewService"];
-        if (!isSafariViewService) {
-            HBLogDebug(@"-> %@ is a system application except Safari View Service", srcId);
-            return NO;
+    if ([gUseLenientModeSources containsObject:srcId]) {
+        HBLogDebug(@"> [ACCEPT] %@ is in lenient mode", srcId);
+
+        if (gLastTransitionStamps[srcId]) {
+            CFTimeInterval lastTransitionStamp = [gLastTransitionStamps[srcId] doubleValue];
+            CFTimeInterval nowStamp = CACurrentMediaTime();
+            CFTimeInterval lastInterval = fabs(nowStamp - lastTransitionStamp);
+            if (lastInterval > 10.0) {
+                HBLogDebug(@">> [ACCEPT] Last transition was %.3f seconds ago", lastInterval);
+                return NO;
+            }
         }
     }
 
     NSString *mapping = [NSString stringWithFormat:@"%@->%@", srcId, destId];
     if ([gCustomAllowedMappings containsObject:mapping]) {
-        HBLogDebug(@"-> Custom mapping %@ is allowed", mapping);
+        HBLogDebug(@"> [ACCEPT] Custom mapping %@ is allowed", mapping);
         return NO;
     }
 
     if ([gForbiddenLaunchSources containsObject:srcId]) {
-        HBLogDebug(@"-> %@ is forbidden from launching others", srcId);
+        HBLogDebug(@"> [REJECT] %@ is forbidden from launching others", srcId);
         return YES;
     }
 
     if ([gForbiddenLaunchDestinations containsObject:destId]) {
-        HBLogDebug(@"-> %@ is forbidden from being launched", destId);
+        HBLogDebug(@"> [REJECT] %@ is forbidden from being launched", destId);
+
+        if ([srcId hasPrefix:@"com.apple."]) {
+            BOOL isSafariViewService = [srcId isEqualToString:@"com.apple.mobilesafari"] || [srcId isEqualToString:@"com.apple.SafariViewService"];
+            if (!isSafariViewService) {
+                HBLogDebug(@">> [ACCEPT] %@ is a system application except Safari View Service", srcId);
+                return NO;
+            }
+        }
+
         return YES;
     }
 
     if (([destId isEqualToString:@"com.apple.AppStore"] || [destId isEqualToString:@"com.apple.ios.StoreKitUIService"]) && [gForbiddenLaunchSourcesForAppStore containsObject:srcId]) {
-        HBLogDebug(@"-> %@ is forbidden from launching App Store", srcId);
+        HBLogDebug(@"> [REJECT] %@ is forbidden from launching App Store", srcId);
         return YES;
     }
 
     if (([destId isEqualToString:@"com.apple.mobilesafari"] || [destId isEqualToString:@"com.apple.SafariViewService"]) && [gForbiddenLaunchSourcesForSafariServices containsObject:srcId]) {
-        HBLogDebug(@"-> %@ is forbidden from launching Safari View Service", srcId);
+        HBLogDebug(@"> [REJECT] %@ is forbidden from launching Safari View Service", srcId);
         return YES;
     }
 
     if ([gCustomForbiddenMappings containsObject:mapping]) {
-        HBLogDebug(@"-> Custom mapping %@ is forbidden", mapping);
+        HBLogDebug(@"> [REJECT] Custom mapping %@ is forbidden", mapping);
         return YES;
     }
 
-    HBLogDebug(@"-> Allowed");
+    HBLogDebug(@"> [ACCEPT] Allowed");
     return NO;
 }
 
@@ -228,7 +259,47 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
 
 %group NoRedirectPrimary
 
+// %hook FBSystemService
+// 
+// - (void)_reallyActivateApplication:(id)arg1 requestID:(id)arg2 options:(id)arg3 source:(id)arg4 originalSource:(id)arg5 isTrusted:(BOOL)arg6 sequenceNumber:(unsigned long long)arg7 cacheGUID:(id)arg8 ourSequenceNumber:(unsigned long long)arg9 ourCacheGUID:(id)arg10 withResult:(/*^block*/id)arg11 {
+//     %log; %orig;
+// }
+// 
+// %end
+
 %hook SBMainWorkspace
+
+- (BOOL)_executeTransitionRequest:(id)arg1 options:(unsigned long long)arg2 validator:(id)arg3 {
+    HBLogDebug(@"_executeTransitionRequest: %@, options: %llu, validator: %@", arg1, (unsigned long long)arg2, arg3);
+
+    BOOL transitionFinished = %orig;
+    if (!transitionFinished) {
+        return NO;
+    }
+
+    if (!gEnabled) {
+        return transitionFinished;
+    }
+
+    if (![arg1 isKindOfClass:%c(SBMainWorkspaceTransitionRequest)]) {
+        return transitionFinished;
+    }
+
+    SBWorkspaceTransitionRequest *request = (SBWorkspaceTransitionRequest *)arg1;
+    SBApplicationSceneEntity *toEntity = request.toApplicationSceneEntities.anyObject;
+    NSString *toAppId = toEntity.application.bundleIdentifier;
+    if (!toAppId) {
+        return transitionFinished;
+    }
+
+    if (!gLastTransitionStamps) {
+        gLastTransitionStamps = [NSMutableDictionary dictionary];
+    }
+
+    gLastTransitionStamps[toAppId] = @(CACurrentMediaTime());
+    HBLogDebug(@"Recorded transition to %@ at %.3f", toAppId, [gLastTransitionStamps[toAppId] doubleValue]);
+    return transitionFinished;
+}
 
 - (BOOL)_canExecuteTransitionRequest:(id)arg1 forExecution:(BOOL)arg2 {
     if (!gEnabled) {
@@ -263,8 +334,9 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
         }
     }
 
-    SBApplicationSceneEntity *toEntity = request.toApplicationSceneEntities.anyObject;
     NSString *fromAppId = fromEntity.application.bundleIdentifier ?: request.originatingProcess.bundleIdentifier;
+
+    SBApplicationSceneEntity *toEntity = request.toApplicationSceneEntities.anyObject;
     NSString *toAppId = toEntity.application.bundleIdentifier;
     if (ShouldDeclineRequest(fromAppId, toAppId)) {
         RecordRequest(fromAppId, toAppId, YES);

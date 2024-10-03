@@ -18,8 +18,6 @@
 
 "Cancel" = "取消";
 
-"Cancel all blocks automatically in 10 seconds after application becoming active." = "应用程序进入前台 10 秒后自动取消所有拦截。";
-
 "Cancellation" = "解除";
 
 "Common Blocks" = "常用拦截";
@@ -37,6 +35,8 @@
 "General" = "通用";
 
 "Modified" = "已修改";
+
+"Pause all blocks automatically in 10 seconds each time when application become active." = "每次应用程序进入前台 10 秒后自动暂停所有拦截。";
 
 "Safari" = "Safari 浏览器";
 

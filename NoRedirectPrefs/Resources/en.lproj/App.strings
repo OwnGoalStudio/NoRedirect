@@ -18,8 +18,6 @@
 
 "Cancel" = "Cancel";
 
-"Cancel all blocks automatically in 10 seconds after application becoming active." = "Cancel all blocks automatically in 10 seconds after application becoming active.";
-
 "Cancellation" = "Cancellation";
 
 "Common Blocks" = "Common Blocks";
@@ -37,6 +35,8 @@
 "General" = "General";
 
 "Modified" = "Modified";
+
+"Pause all blocks automatically in 10 seconds each time when application become active." = "Pause all blocks automatically in 10 seconds each time when application become active.";
 
 "Safari" = "Safari";
 
