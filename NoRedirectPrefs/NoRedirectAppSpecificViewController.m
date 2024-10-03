@@ -1,6 +1,5 @@
 #import <AltList/AltList.h>
 #import <Foundation/Foundation.h>
-#import <Foundation/NSArray.h>
 #import <MobileCoreServices/LSApplicationProxy.h>
 #import <Preferences/PSSpecifier.h>
 #import <UIKit/UIKit.h>
@@ -9,6 +8,7 @@
 #import "NoRedirectAppSpecificViewController.h"
 
 @implementation NoRedirectAppSpecificViewController {
+    NSString *_applicationName;
     PSSpecifier *_blockedSpecifier;
     NSMutableArray<NSString *> *_blockedApplications;
     NSMutableArray<NSString *> *_blockedApplicationNames;
@@ -25,16 +25,27 @@
     }
 }
 
+- (NSString *)applicationName {
+    if (!_applicationName) {
+        LSApplicationProxy *appProxy = [LSApplicationProxy applicationProxyForIdentifier:self.applicationID];
+        _applicationName = appProxy.localizedName;
+    }
+    return _applicationName ?: self.specifier.name;
+}
+
 - (void)setSpecifier:(PSSpecifier *)specifier {
     [super setSpecifier:specifier];
-    self.applicationID = [specifier propertyForKey:@"applicationIdentifier"];
-    [self setTitle:specifier.name];
+
+    NSString *appId = [specifier propertyForKey:@"applicationIdentifier"];
+    self.applicationID = appId;
+
+    [self setTitle:[self applicationName]];
 }
 
 - (NSMutableArray *)loadSpecifiersFromPlistName:(NSString *)plistName target:(id)target {
     NSMutableArray *specifiers = [super loadSpecifiersFromPlistName:plistName target:target];
-    if ([self.title isEqualToString:@""] || !self.title) {
-        [self setTitle:[self specifier].name];
+    if (!self.title || self.title.length == 0) {
+        [self setTitle:[self applicationName]];
     }
     return specifiers;
 }
@@ -225,7 +236,7 @@
     }
     return [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"“%@” is blocked from launching %@.", @"App",
                                                                          [NSBundle bundleForClass:self.class], nil),
-                                      self.title, what];
+                                      _applicationName, what];
 }
 
 - (NSString *)bypassedFooterText {
@@ -266,7 +277,7 @@
         stringWithFormat:NSLocalizedStringFromTableInBundle(
                              @"“%@” is always allowed to be launched by %@. These rules have the highest priority.",
                              @"App", [NSBundle bundleForClass:self.class], nil),
-                         self.title, what];
+                         _applicationName, what];
 }
 
 - (void)addCustomBlock {
@@ -296,7 +307,7 @@
     if ([selectionCtrl respondsToSelector:@selector(highlightSearchText)]) {
         selectionCtrl.highlightSearchText = YES;
     }
-    selectionCtrl.title = self.title;
+    selectionCtrl.title = _applicationName;
     selectionCtrl.presentingParentController = self;
     selectionCtrl.preferenceKey = prefKey;
 

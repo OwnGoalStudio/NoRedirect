@@ -5,3 +5,5 @@
 "Declined on %@" = "拦截于 %@";
 
 "Redirected on %@" = "重定向于 %@";
+
+"No history" = "无历史记录";

@@ -1,12 +1,9 @@
 #import <Foundation/Foundation.h>
-#import <Foundation/NSArray.h>
-#import <Foundation/NSBundle.h>
-#import <Foundation/NSDateFormatter.h>
-#import <Foundation/NSDictionary.h>
 #import <MobileCoreServices/LSApplicationProxy.h>
 #import <Preferences/PSSpecifier.h>
 #import <UIKit/UIKit.h>
 
+#import "NoRedirectAppSpecificViewController.h"
 #import "NoRedirectHistoryViewController.h"
 #import "NoRedirectRecord.h"
 
@@ -18,6 +15,14 @@
     return YES;
 }
 
+- (PSCellType)cellTypeForApplicationCells {
+	return PSLinkListCell;
+}
+
+- (Class)detailControllerClassForSpecifierOfApplicationProxy:(LSApplicationProxy *)applicationProxy {
+    return [NoRedirectAppSpecificViewController class];
+}
+
 + (NSDateFormatter *)mediumDateFormatter {
     static NSDateFormatter *formatter;
     static dispatch_once_t onceToken;
@@ -27,6 +32,19 @@
       formatter.timeStyle = NSDateFormatterNoStyle;
     });
     return formatter;
+}
+
+- (PSSpecifier *)createEmptySpecifier {
+    PSSpecifier *specifier = [PSSpecifier
+        preferenceSpecifierNamed:NSLocalizedStringFromTableInBundle(@"No history", @"History",
+                                                                    [NSBundle bundleForClass:[self class]], nil)
+                          target:nil
+                             set:nil
+                             get:nil
+                          detail:nil
+                            cell:PSGroupCell
+                            edit:nil];
+    return specifier;
 }
 
 - (NSArray *)specifiers {
@@ -89,7 +107,14 @@
                 [specifiers addObject:dateSpecifier];
             }
 
+            specifier.identifier = [NSString stringWithFormat:@"%@-%@-%.0f", record.source, record.target, record.createdAt.timeIntervalSince1970];
+
             [specifiers addObject:specifier];
+        }
+
+        if (specifiers.count == 0) {
+            PSSpecifier *emptySpecifier = [self createEmptySpecifier];
+            [specifiers addObject:emptySpecifier];
         }
 
         _specifiers = specifiers;
@@ -163,7 +188,7 @@
 
 - (void)realClearHistory {
     [NoRedirectRecord clearAllRecords];
-    [self updateSpecifiers:[self specifiers] withSpecifiers:@[]];
+    [self updateSpecifiers:[self specifiers] withSpecifiers:@[ [self createEmptySpecifier] ]];
 }
 
 @end
