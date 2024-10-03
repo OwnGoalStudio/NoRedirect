@@ -6,6 +6,8 @@
 #import <libSandy.h>
 #import <HBLog.h>
 
+#import "NoRedirectRecord.h"
+
 @interface BSProcessHandle : NSObject
 @property (getter=isValid, nonatomic, assign, readonly) BOOL valid;
 @property (nonatomic, assign, readonly) int pid;
@@ -183,7 +185,7 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
     HBLogDebug(@"Checking if %@ should be allowed to launch %@", srcId, destId);
 
     if (!srcId || !destId) {
-        HBLogError(@"> [ACCEPT] Invalid source or destination");
+        HBLogDebug(@"> [ACCEPT] Invalid source or destination");
         return NO;
     }
 
@@ -251,9 +253,15 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
 }
 
 static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
+    if (!srcId || !destId) {
+        return;
+    }
+
     if (!gRecordingEnabled) {
         return;
     }
+
+    [NoRedirectRecord insertRecord:declined source:srcId target:destId];
 }
 
 %group NoRedirectPrimary
@@ -415,6 +423,7 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
     );
 
     if ([processName isEqualToString:@"SpringBoard"]) {
+        [NoRedirectRecord clearAllRecordsBeforeBoot];
         %init(NoRedirectPrimary);
     } else if ([processName isEqualToString:@"SafariViewService"]) {
         %init(NoRedirectSafari);

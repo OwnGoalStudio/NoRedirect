@@ -21,6 +21,7 @@ include $(THEOS_MAKE_PATH)/aggregate.mk
 TWEAK_NAME := NoRedirect
 
 NoRedirect_FILES += NoRedirect.xm
+NoRedirect_FILES += NoRedirectRecord.m
 NoRedirect_CFLAGS += -fobjc-arc
 NoRedirect_CFLAGS += -IHeaders
 NoRedirect_LDFLAGS += -LLibraries
