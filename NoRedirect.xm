@@ -261,6 +261,12 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
         return;
     }
 
+    if ([destId isEqualToString:@"com.apple.SafariViewService"]) {
+        destId = @"com.apple.mobilesafari";
+    } else if ([destId isEqualToString:@"com.apple.ios.StoreKitUIService"]) {
+        destId = @"com.apple.AppStore";
+    }
+
     [NoRedirectRecord insertRecord:declined source:srcId target:destId];
 }
 

@@ -6,4 +6,6 @@
 
 "Redirected on %@" = "重定向于 %@";
 
+"Settings of “%@” cannot be modified." = "无法修改 “%@” 的设置。";
+
 "No history" = "无历史记录";

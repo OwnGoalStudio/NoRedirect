@@ -91,6 +91,7 @@
                 [NSString stringWithFormat:@"%@  ❯  %@", srcProxy.atl_nameToDisplay, targetProxy.atl_nameToDisplay];
 
             [specifier setProperty:record forKey:@"associatedRecord"];
+            [specifier setProperty:srcProxy.atl_nameToDisplay forKey:@"applicationName"];
 
             NSString *newDateString =
                 [[NoRedirectHistoryViewController mediumDateFormatter] stringFromDate:record.createdAt];
@@ -191,6 +192,30 @@
 - (void)realClearHistory {
     [NoRedirectRecord clearAllRecords];
     [self updateSpecifiers:[self specifiers] withSpecifiers:@[ [self createEmptySpecifier] ]];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    PSSpecifier *specifier = [self specifierAtIndexPath:indexPath];
+    NSString *appId = [specifier propertyForKey:@"applicationIdentifier"];
+    if ([appId isEqualToString:@"com.apple.springboard"]) {
+        NSString *appName = [specifier propertyForKey:@"applicationName"];
+        UIAlertController *alert = [UIAlertController
+            alertControllerWithTitle:nil
+                             message:[NSString stringWithFormat:NSLocalizedStringFromTableInBundle(
+                                                                    @"Settings of “%@” cannot be modified.", @"History",
+                                                                    [NSBundle bundleForClass:self.class], nil),
+                                                                appName]
+                      preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(
+                                                            @"OK", @"Root", [NSBundle bundleForClass:self.class], nil)
+                                                  style:UIAlertActionStyleCancel
+                                                handler:^(UIAlertAction *_Nonnull action) {
+                                                  [tableView deselectRowAtIndexPath:indexPath animated:YES];
+                                                }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+    [super tableView:tableView didSelectRowAtIndexPath:indexPath];
 }
 
 @end
