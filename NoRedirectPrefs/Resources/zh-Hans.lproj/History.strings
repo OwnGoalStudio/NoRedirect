@@ -1,5 +1,9 @@
 "Are you sure you want to clear the redirect history?" = "你确定要清除重定向历史记录吗？";
 
+"By Date" = "按日期";
+
+"By Application" = "按应用程序";
+
 "Clear" = "清除";
 
 "Declined on %@" = "拦截于 %@";
@@ -9,3 +13,11 @@
 "Settings of “%@” cannot be modified." = "无法修改 “%@” 的设置。";
 
 "No history" = "无历史记录";
+
+"No Redirect has recognized %@ for you since the last boot." = "自上次启动以来，禁字诀已为你识别 %@。";
+
+"No Redirect has recognized %@ and declined %@ for you since the last boot." = "自上次启动以来，禁字诀已为你识别 %@，并拦截其中的 %@。";
+
+"1 request" = "1 个重定向请求";
+
+"%ld requests" = "%ld 个重定向请求";

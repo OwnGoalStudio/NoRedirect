@@ -1,5 +1,9 @@
 "Are you sure you want to clear the redirect history?" = "Are you sure you want to clear the redirect history?";
 
+"By Date" = "By Date";
+
+"By Application" = "By Application";
+
 "Clear" = "Clear";
 
 "Declined on %@" = "Declined on %@";
@@ -9,3 +13,11 @@
 "Settings of “%@” cannot be modified." = "Settings of “%@” cannot be modified.";
 
 "No history" = "No history";
+
+"No Redirect has recognized %@ for you since the last boot." = "No Redirect has recognized %@ for you since the last boot.";
+
+"No Redirect has recognized %@ and declined %@ for you since the last boot." = "No Redirect has recognized %@ and declined %@ for you since the last boot.";
+
+"1 request" = "1 request";
+
+"%ld requests" = "%ld requests";
