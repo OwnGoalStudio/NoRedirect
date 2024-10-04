@@ -345,12 +345,14 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
         return %orig;
     }
 
+    BOOL isFromBreadcrumb = NO;
     SBWorkspaceTransitionRequest *request = (SBWorkspaceTransitionRequest *)arg1;
     NSString *eventLabel = request.eventLabel;
     if (eventLabel) {
         HBLogDebug(@"Event Label: %@", eventLabel);
 
-        BOOL isEligibleForDecline = [eventLabel containsString:@"OpenApplication"] && [eventLabel containsString:@"ForRequester"];
+        isFromBreadcrumb = [eventLabel containsString:@"ActivateFromBreadcrumb"];
+        BOOL isEligibleForDecline = isFromBreadcrumb || ([eventLabel containsString:@"OpenApplication"] && [eventLabel containsString:@"ForRequester"]);
         if (!isEligibleForDecline) {
             return %orig;
         }
@@ -372,20 +374,17 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
         fromAppId = fromEntity.application.bundleIdentifier;
     } else {
         NSString *fromProcessName = request.originatingProcess.name;
-        if ([fromProcessName isEqualToString:@"lsd"]) {
-            HBLogWarn(@"Edge case: lsd is the proxy process");
-
-            // primary role
+        if (isFromBreadcrumb || [fromProcessName isEqualToString:@"lsd"]) {
             SBLayoutElement *fromElement = [request.applicationContext.previousLayoutState elementWithRole:1];
             fromAppId = fromElement.uniqueIdentifier;
 
-            // remove prefix
             if ([fromAppId hasPrefix:@"sceneID:"]) {
                 fromAppId = [fromAppId substringFromIndex:8];
             }
 
-            // remove uuid suffix
-            if (fromAppId.length > 37) {
+            if ([fromAppId hasSuffix:@"-default"]) {
+                fromAppId = [fromAppId substringToIndex:fromAppId.length - 8];
+            } else if (fromAppId.length > 37) {
                 fromAppId = [fromAppId substringToIndex:fromAppId.length - 37];
             }
         }
