@@ -9,42 +9,56 @@
 #import "NoRedirectRecord.h"
 
 @interface BSProcessHandle : NSObject
-@property (getter=isValid, nonatomic, assign, readonly) BOOL valid;
-@property (nonatomic, assign, readonly) int pid;
-@property (nonatomic, copy, readonly) NSString *bundleIdentifier;
+@property(getter=isValid, nonatomic, assign, readonly) BOOL valid;
+@property(nonatomic, assign, readonly) int pid;
+@property(nonatomic, copy, readonly) NSString *bundleIdentifier;
+@property(nonatomic, copy, readonly) NSString *name;
 @end
 
 @interface SBApplicationProcessState : NSObject
-@property (nonatomic, assign, readonly) int pid;
-@property (getter=isRunning, nonatomic, assign, readonly) BOOL running;
-@property (getter=isForeground, nonatomic, assign, readonly) BOOL foreground;
+@property(nonatomic, assign, readonly) int pid;
+@property(getter=isRunning, nonatomic, assign, readonly) BOOL running;
+@property(getter=isForeground, nonatomic, assign, readonly) BOOL foreground;
 @end
 
 @interface SBApplication : NSObject
-@property (nonatomic, copy, readonly) NSString *bundleIdentifier;
-@property (nonatomic, strong, readonly) SBApplicationProcessState *processState;
+@property(nonatomic, copy, readonly) NSString *bundleIdentifier;
+@property(nonatomic, strong, readonly) SBApplicationProcessState *processState;
 @end
 
 @interface SBApplicationSceneEntity : NSObject
-@property (nonatomic, strong, readonly) SBApplication *application;
-@property (nonatomic, copy, readonly) NSSet *actions;
+@property(nonatomic, strong, readonly) SBApplication *application;
+@property(nonatomic, copy, readonly) NSSet *actions;
+@end
+
+@interface SBLayoutElement : NSObject
+@property(nonatomic, copy, readonly) NSString *uniqueIdentifier;
+@end
+
+@interface SBLayoutState : NSObject
+@property(nonatomic, readonly) NSSet<SBLayoutElement *> *elements;
+- (SBLayoutElement *)elementWithRole:(long long)arg1;
 @end
 
 @interface SBWorkspaceApplicationSceneTransitionContext : NSObject
+@property(nonatomic, copy, readonly) NSSet<SBApplicationSceneEntity *> *applicationSceneEntities;
+@property(nonatomic, copy, readonly) NSSet<SBApplicationSceneEntity *> *previousApplicationSceneEntities;
+@property(nonatomic, strong, readonly) SBLayoutState *previousLayoutState;
+@property(nonatomic, strong, readonly) SBLayoutState *layoutState;
 - (void)setBackground:(BOOL)arg1;
 @end
 
 @interface SBWorkspaceTransitionRequest : NSObject
-@property (nonatomic, copy, readonly) NSString *eventLabel;
-@property (nonatomic, copy, readonly) NSSet<SBApplicationSceneEntity *> *toApplicationSceneEntities;
-@property (nonatomic, copy, readonly) NSSet<SBApplicationSceneEntity *> *fromApplicationSceneEntities;
-@property (nonatomic, strong, readonly) BSProcessHandle *originatingProcess;
-@property (nonatomic, strong, readonly) SBWorkspaceApplicationSceneTransitionContext *applicationContext;
+@property(nonatomic, copy, readonly) NSSet<SBApplicationSceneEntity *> *toApplicationSceneEntities;
+@property(nonatomic, copy, readonly) NSSet<SBApplicationSceneEntity *> *fromApplicationSceneEntities;
+@property(nonatomic, copy, readonly) NSString *eventLabel;
+@property(nonatomic, strong, readonly) BSProcessHandle *originatingProcess;
+@property(nonatomic, strong, readonly) SBWorkspaceApplicationSceneTransitionContext *applicationContext;
 - (void)declineWithReason:(id)arg1;
 @end
 
 @interface SBApplicationInfo : NSObject
-@property (nonatomic, copy, readonly) NSString *bundleIdentifier;
+@property(nonatomic, copy, readonly) NSString *bundleIdentifier;
 @end
 
 @interface UIViewController (NoRedirect)
@@ -78,7 +92,8 @@ static void ReloadPrefs(void) {
     static NSUserDefaults *prefs = nil;
     if (!prefs) {
         if (gIsSafariViewService) {
-            prefs = [[NSUserDefaults alloc] initWithSuiteName:@"/var/mobile/Library/Preferences/com.82flex.noredirectprefs.plist"];
+            prefs = [[NSUserDefaults alloc]
+                initWithSuiteName:@"/var/mobile/Library/Preferences/com.82flex.noredirectprefs.plist"];
         } else {
             prefs = [[NSUserDefaults alloc] initWithSuiteName:@"com.82flex.noredirectprefs"];
         }
@@ -223,7 +238,8 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
         HBLogDebug(@"> [REJECT] %@ is forbidden from being launched", destId);
 
         if ([srcId hasPrefix:@"com.apple."]) {
-            BOOL isSafariViewService = [srcId isEqualToString:@"com.apple.mobilesafari"] || [srcId isEqualToString:@"com.apple.SafariViewService"];
+            BOOL isSafariViewService = [srcId isEqualToString:@"com.apple.mobilesafari"] ||
+                                       [srcId isEqualToString:@"com.apple.SafariViewService"];
             if (!isSafariViewService) {
                 HBLogDebug(@">> [ACCEPT] %@ is a system application except Safari View Service", srcId);
                 return NO;
@@ -233,12 +249,16 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
         return YES;
     }
 
-    if (([destId isEqualToString:@"com.apple.AppStore"] || [destId isEqualToString:@"com.apple.ios.StoreKitUIService"]) && [gForbiddenLaunchSourcesForAppStore containsObject:srcId]) {
+    if (([destId isEqualToString:@"com.apple.AppStore"] ||
+         [destId isEqualToString:@"com.apple.ios.StoreKitUIService"]) &&
+        [gForbiddenLaunchSourcesForAppStore containsObject:srcId]) {
         HBLogDebug(@"> [REJECT] %@ is forbidden from launching App Store", srcId);
         return YES;
     }
 
-    if (([destId isEqualToString:@"com.apple.mobilesafari"] || [destId isEqualToString:@"com.apple.SafariViewService"]) && [gForbiddenLaunchSourcesForSafariServices containsObject:srcId]) {
+    if (([destId isEqualToString:@"com.apple.mobilesafari"] ||
+         [destId isEqualToString:@"com.apple.SafariViewService"]) &&
+        [gForbiddenLaunchSourcesForSafariServices containsObject:srcId]) {
         HBLogDebug(@"> [REJECT] %@ is forbidden from launching Safari View Service", srcId);
         return YES;
     }
@@ -336,19 +356,42 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
         }
     }
 
+    NSString *fromAppId = nil;
     SBApplicationSceneEntity *fromEntity = request.fromApplicationSceneEntities.anyObject;
-    id fromAction = fromEntity.actions.anyObject;
-    if (fromAction) {
-        HBLogDebug(@"From Action: %@", fromAction);
+    if (fromEntity) {
+        id fromAction = fromEntity.actions.anyObject;
+        if (fromAction) {
+            HBLogDebug(@"From Action: %@", fromAction);
 
-        BOOL isEligibleForDecline = [fromAction isKindOfClass:%c(UIOpenURLAction)];
-        if (!isEligibleForDecline) {
-            return %orig;
+            BOOL isEligibleForDecline = [fromAction isKindOfClass:%c(UIOpenURLAction)];
+            if (!isEligibleForDecline) {
+                return %orig;
+            }
+        }
+
+        fromAppId = fromEntity.application.bundleIdentifier;
+    } else {
+        NSString *fromProcessName = request.originatingProcess.name;
+        if ([fromProcessName isEqualToString:@"lsd"]) {
+            HBLogWarn(@"Edge case: lsd is the proxy process");
+
+            // primary role
+            SBLayoutElement *fromElement = [request.applicationContext.previousLayoutState elementWithRole:1];
+            fromAppId = fromElement.uniqueIdentifier;
+
+            // remove prefix
+            if ([fromAppId hasPrefix:@"sceneID:"]) {
+                fromAppId = [fromAppId substringFromIndex:8];
+            }
+
+            // remove uuid suffix
+            if (fromAppId.length > 37) {
+                fromAppId = [fromAppId substringToIndex:fromAppId.length - 37];
+            }
         }
     }
 
-    NSString *fromAppId = fromEntity.application.bundleIdentifier ?: request.originatingProcess.bundleIdentifier;
-
+    fromAppId = fromAppId ?: request.originatingProcess.bundleIdentifier;
     SBApplicationSceneEntity *toEntity = request.toApplicationSceneEntities.anyObject;
     NSString *toAppId = toEntity.application.bundleIdentifier;
     if (ShouldDeclineRequest(fromAppId, toAppId)) {
