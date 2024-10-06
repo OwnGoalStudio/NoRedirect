@@ -14,6 +14,10 @@
 @synthesize createdAt = _createdAt;
 
 + (sqlite3 *)sharedDatabase {
+    return [self sharedDatabase:YES];
+}
+
++ (sqlite3 *)sharedDatabase:(BOOL)createIfNotExists {
     static sqlite3 *db = NULL;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -21,6 +25,9 @@
           [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) firstObject];
       NSString *preferencesPath = [libraryPath stringByAppendingPathComponent:@"Preferences"];
       NSString *databasePath = [preferencesPath stringByAppendingPathComponent:@"com.82flex.noredirect.db"];
+      if (!createIfNotExists && ![[NSFileManager defaultManager] fileExistsAtPath:databasePath]) {
+          return;
+      }
       if (sqlite3_open([databasePath UTF8String], &db) == SQLITE_OK) {
           char *error;
           if (sqlite3_exec(db, "PRAGMA journal_mode=WAL;", NULL, NULL, &error) != SQLITE_OK) {
@@ -98,7 +105,10 @@
 }
 
 + (void)clearAllRecords {
-    sqlite3 *db = [self sharedDatabase];
+    sqlite3 *db = [self sharedDatabase:NO];
+    if (!db) {
+        return;
+    }
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, "DELETE FROM records;", -1, &stmt, NULL) == SQLITE_OK) {
         if (sqlite3_step(stmt) != SQLITE_DONE) {
