@@ -1,6 +1,3 @@
-#import <CoreFoundation/CoreFoundation.h>
-#import <Foundation/Foundation.h>
-#import <math.h>
 #import <UIKit/UIKit.h>
 
 #import <libSandy.h>

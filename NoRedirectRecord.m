@@ -1,8 +1,8 @@
 #import "NoRedirectRecord.h"
 
-#import <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h>
 #import <HBLog.h>
+#import <libroot.h>
 #import <QuartzCore/QuartzCore.h>
 #import <sqlite3.h>
 
@@ -21,10 +21,8 @@
     static sqlite3 *db = NULL;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-      NSString *libraryPath =
-          [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) firstObject];
-      NSString *preferencesPath = [libraryPath stringByAppendingPathComponent:@"Preferences"];
-      NSString *databasePath = [preferencesPath stringByAppendingPathComponent:@"com.82flex.noredirect.db"];
+      NSString *cachesPath = JBROOT_PATH_NSSTRING(@"/var/mobile/Library/Caches");
+      NSString *databasePath = [cachesPath stringByAppendingPathComponent:@"com.82flex.noredirect.db"];
       if (!createIfNotExists && ![[NSFileManager defaultManager] fileExistsAtPath:databasePath]) {
           return;
       }
@@ -90,8 +88,11 @@
 }
 
 + (void)clearAllRecordsBeforeBoot {
+    sqlite3 *db = [self sharedDatabase:NO];
+    if (!db) {
+        return;
+    }
     CFTimeInterval bootTime = CACurrentMediaTime();
-    sqlite3 *db = [self sharedDatabase];
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, "DELETE FROM records WHERE created_at < ?;", -1, &stmt, NULL) == SQLITE_OK) {
         sqlite3_bind_int(stmt, 1, (int)bootTime);
