@@ -22,8 +22,14 @@ TWEAK_NAME := NoRedirect
 
 NoRedirect_FILES += NoRedirect.xm
 NoRedirect_FILES += NoRedirectRecord.m
+
+ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+NoRedirect_FILES += libroot/dyn.c
+endif
+
 NoRedirect_CFLAGS += -fobjc-arc
 NoRedirect_CFLAGS += -IHeaders
+
 NoRedirect_LDFLAGS += -LLibraries
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),)

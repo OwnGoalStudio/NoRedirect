@@ -19,6 +19,10 @@ NoRedirectPrefs_FILES += NoRedirectAppSelectionViewController.m
 NoRedirectPrefs_FILES += NoRedirectHistoryViewController.m
 NoRedirectPrefs_FILES += ../NoRedirectRecord.m
 
+ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+NoRedirectPrefs_FILES += ../libroot/dyn.c
+endif
+
 NoRedirectPrefs_CFLAGS += -fobjc-arc
 NoRedirectPrefs_CFLAGS += -I..
 
