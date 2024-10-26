@@ -27,16 +27,21 @@ NoRedirectPrefs_CFLAGS += -fobjc-arc
 NoRedirectPrefs_CFLAGS += -I..
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),1)
-NoRedirectPrefs_CFLAGS += -FFrameworks/Simulator
-NoRedirectPrefs_LDFLAGS += -FFrameworks/Simulator
+NoRedirectPrefs_CFLAGS += -FFrameworks/_simulator
+NoRedirectPrefs_LDFLAGS += -FFrameworks/_simulator
 NoRedirectPrefs_LDFLAGS += -rpath /opt/simject
 else
 ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
-NoRedirectPrefs_CFLAGS += -FFrameworks/Rootless
-NoRedirectPrefs_LDFLAGS += -FFrameworks/Rootless
+NoRedirectPrefs_CFLAGS += -FFrameworks/_rootless
+NoRedirectPrefs_LDFLAGS += -FFrameworks/_rootless
+else
+ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+NoRedirectPrefs_CFLAGS += -FFrameworks/_roothide
+NoRedirectPrefs_LDFLAGS += -FFrameworks/_roothide
 else
 NoRedirectPrefs_CFLAGS += -FFrameworks
 NoRedirectPrefs_LDFLAGS += -FFrameworks
+endif
 endif
 endif
 
