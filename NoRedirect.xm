@@ -448,7 +448,12 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
 
 #if !TARGET_OS_SIMULATOR
     if ([processName isEqualToString:@"SafariViewService"]) {
-        int ret = libSandy_applyProfile("NoRedirectSafari");
+        int ret;
+#if THEOS_PACKAGE_SCHEME_ROOTHIDE
+        ret = libSandy_applyProfile("NoRedirectSafari_RootHide");
+#else
+        ret = libSandy_applyProfile("NoRedirectSafari");
+#endif
         if (ret == kLibSandyErrorXPCFailure) {
             HBLogError(@"Failed to apply libSandy profile");
             return;
