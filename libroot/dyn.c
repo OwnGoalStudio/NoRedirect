@@ -36,12 +36,22 @@ static const char *libroot_get_jbroot_prefix_fallback(void)
 
 static const char *libroot_get_root_prefix_fallback(void)
 {
-	return rootfs("/");
+	char *resolved = (char *)rootfs("/");
+	int len = strlen(resolved);
+	if (len > 1 && resolved[len - 1] == '/') {
+		resolved[len - 1] = '\0';
+	}
+	return resolved;
 }
 
 static const char *libroot_get_jbroot_prefix_fallback(void)
 {
-	return jbroot("/");
+	char *resolved = (char *)jbroot("/");
+	int len = strlen(resolved);
+	if (len > 1 && resolved[len - 1] == '/') {
+		resolved[len - 1] = '\0';
+	}
+	return resolved;
 }
 
 #else
