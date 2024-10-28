@@ -4,7 +4,7 @@ uuids:                 [ 'armv7: E8393BFB-05A6-3A91-AADC-6BB44C2785B9', 'arm64: 
                          'arm64e: 0071493A-6940-36B2-BB35-118C4236A273' ]
 platform:              ios
 flags:                 [ flat_namespace, not_app_extension_safe ]
-install-name:          '/usr/lib/libsandy.dylib'
+install-name:          '@rpath/libsandy.dylib'
 current-version:       0
 compatibility-version: 0
 objc-constraint:       retain_release

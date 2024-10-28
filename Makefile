@@ -30,7 +30,15 @@ endif
 NoRedirect_CFLAGS += -fobjc-arc
 NoRedirect_CFLAGS += -IHeaders
 
+ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+NoRedirect_LDFLAGS += -LLibraries/_roothide
+else
+ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
+NoRedirect_LDFLAGS += -LLibraries/_rootless
+else
 NoRedirect_LDFLAGS += -LLibraries
+endif
+endif
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),)
 NoRedirect_LIBRARIES += sandy

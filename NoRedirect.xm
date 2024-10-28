@@ -464,11 +464,11 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
 
     ReloadPrefs();
     CFNotificationCenterAddObserver(
-        CFNotificationCenterGetDarwinNotifyCenter(), 
-        NULL, 
-        (CFNotificationCallback)ReloadPrefs, 
-        CFSTR("com.82flex.noredirectprefs/saved"), 
-        NULL, 
+        CFNotificationCenterGetDarwinNotifyCenter(),
+        NULL,
+        (CFNotificationCallback)ReloadPrefs,
+        CFSTR("com.82flex.noredirectprefs/saved"),
+        NULL,
         CFNotificationSuspensionBehaviorCoalesce
     );
 
@@ -478,4 +478,6 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
     } else if ([processName isEqualToString:@"SafariViewService"]) {
         %init(NoRedirectSafari);
     }
+
+    HBLogWarn(@"NoRedirect initialized");
 }
