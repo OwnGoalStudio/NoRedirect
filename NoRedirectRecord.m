@@ -69,6 +69,19 @@
     return records;
 }
 
++ (NSInteger)numberOfRecords {
+    sqlite3 *db = [self sharedDatabase];
+    sqlite3_stmt *stmt;
+    NSInteger count = 0;
+    if (sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM records;", -1, &stmt, NULL) == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            count = (NSInteger)sqlite3_column_int(stmt, 0);
+        }
+        sqlite3_finalize(stmt);
+    }
+    return count;
+}
+
 + (void)insertRecord:(BOOL)declined source:(NSString *)sourceIdentifier target:(NSString *)targetIdentifier {
     sqlite3 *db = [self sharedDatabase];
     sqlite3_stmt *stmt;

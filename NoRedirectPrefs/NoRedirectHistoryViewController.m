@@ -4,6 +4,7 @@
 #import <UIKit/UIKit.h>
 
 #import "LSApplicationProxy+AltList.h"
+#import "LSApplicationProxy+NoRedirect.h"
 #import "NoRedirectAppSpecificViewController.h"
 #import "NoRedirectHistoryViewController.h"
 #import "NoRedirectRecord.h"
@@ -16,6 +17,7 @@
     UIBarButtonItem *_clearButton;
     PSSpecifier *_emptySpecifier;
     PSSpecifier *_statisticSpecifier;
+    UIImage *_sbIconImage;
 }
 
 - (BOOL)shouldShowSubtitles {
@@ -97,6 +99,13 @@
     return _statisticSpecifier;
 }
 
+- (UIImage *)sbIconImage {
+    if (!_sbIconImage) {
+        _sbIconImage = [UIImage imageNamed:@"SpringBoard" inBundle:self.bundle withConfiguration:nil];
+    }
+    return _sbIconImage;
+}
+
 - (NSInteger)selectedStatisticsType {
     return [[self readPreferenceValue:[self statisticSpecifier]] integerValue];
 }
@@ -139,7 +148,7 @@
                         cachedProxies[record.source] = srcProxy;
                     }
                 }
-                if (!srcProxy || srcProxy.atl_isHidden || !srcProxy.atl_nameToDisplay) {
+                if (!srcProxy || srcProxy.atl_isHidden || !srcProxy.nrt_nameToDisplay) {
                     continue;
                 }
 
@@ -150,7 +159,7 @@
                         cachedProxies[record.target] = targetProxy;
                     }
                 }
-                if (!targetProxy || targetProxy.atl_isHidden || !targetProxy.atl_nameToDisplay) {
+                if (!targetProxy || targetProxy.atl_isHidden || !targetProxy.nrt_nameToDisplay) {
                     continue;
                 }
 
@@ -160,10 +169,10 @@
                 }
 
                 specifier.name =
-                    [NSString stringWithFormat:@"%@  ❯  %@", srcProxy.atl_nameToDisplay, targetProxy.atl_nameToDisplay];
+                    [NSString stringWithFormat:@"%@  ❯  %@", srcProxy.nrt_nameToDisplay, targetProxy.nrt_nameToDisplay];
 
                 [specifier setProperty:record forKey:@"associatedRecord"];
-                [specifier setProperty:srcProxy.atl_nameToDisplay forKey:@"applicationName"];
+                [specifier setProperty:srcProxy.nrt_nameToDisplay forKey:@"applicationName"];
 
                 NSString *newDateString =
                     [[NoRedirectHistoryViewController mediumDateFormatter] stringFromDate:record.createdAt];
@@ -210,7 +219,7 @@
                         cachedProxies[record.source] = srcProxy;
                     }
                 }
-                if (!srcProxy || srcProxy.atl_isHidden || !srcProxy.atl_nameToDisplay) {
+                if (!srcProxy || srcProxy.atl_isHidden || !srcProxy.nrt_nameToDisplay) {
                     continue;
                 }
 
@@ -221,7 +230,7 @@
                         cachedProxies[record.target] = targetProxy;
                     }
                 }
-                if (!targetProxy || targetProxy.atl_isHidden || !targetProxy.atl_nameToDisplay) {
+                if (!targetProxy || targetProxy.atl_isHidden || !targetProxy.nrt_nameToDisplay) {
                     continue;
                 }
 
@@ -247,7 +256,7 @@
                   if (countResult != NSOrderedSame) {
                       return countResult;
                   }
-                  return [obj1.atl_nameToDisplay localizedStandardCompare:obj2.atl_nameToDisplay];
+                  return [obj1.nrt_nameToDisplay localizedStandardCompare:obj2.nrt_nameToDisplay];
                 }];
 
             NSMutableArray<PSSpecifier *> *groupedSpecifiers = [NSMutableArray array];
@@ -257,8 +266,10 @@
                     continue;
                 }
 
+                specifier.name = [NSString stringWithFormat:@"%@", proxy.nrt_nameToDisplay];
+
                 [specifier setProperty:requestsCountMapping[proxy.bundleIdentifier] forKey:@"associatedCount"];
-                [specifier setProperty:proxy.atl_nameToDisplay forKey:@"applicationName"];
+                [specifier setProperty:proxy.nrt_nameToDisplay forKey:@"applicationName"];
                 [groupedSpecifiers addObject:specifier];
             }
 
@@ -289,6 +300,8 @@
             [lastGroupSpecifier setProperty:[self statisticContentWithDeclinedCount:declinedCount totalCount:totalCount]
                                      forKey:@"footerText"];
         }
+
+        [self reloadClearButtonState];
 
         _specifiers = specifiers;
     }
@@ -391,6 +404,13 @@
                action:@selector(clearHistory)];
 
     self.navigationItem.rightBarButtonItem = _clearButton;
+
+    [self reloadClearButtonState];
+}
+
+- (void)reloadClearButtonState {
+    NSInteger recordsCount = [NoRedirectRecord numberOfRecords];
+    _clearButton.enabled = (recordsCount > 0);
 }
 
 - (void)clearHistory {
@@ -416,6 +436,7 @@
 - (void)realClearHistory {
     [NoRedirectRecord clearAllRecords];
     [self updateSpecifiers:[self specifiers] withSpecifiers:@[ [self createEmptySpecifier] ]];
+    [self reloadClearButtonState];
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -440,6 +461,19 @@
         return;
     }
     [super tableView:tableView didSelectRowAtIndexPath:indexPath];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell = [super tableView:tableView cellForRowAtIndexPath:indexPath];
+
+    PSSpecifier *specifier = [self specifierAtIndexPath:indexPath];
+    NSString *appId = [specifier propertyForKey:@"applicationIdentifier"];
+    if ([appId isEqualToString:@"com.apple.springboard"]) {
+        cell.accessoryType = UITableViewCellAccessoryNone;
+        cell.imageView.image = [self sbIconImage];
+    }
+
+    return cell;
 }
 
 @end

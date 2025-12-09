@@ -17,6 +17,7 @@ NoRedirectPrefs_FILES += NoRedirectAppListController.m
 NoRedirectPrefs_FILES += NoRedirectAppSpecificViewController.m
 NoRedirectPrefs_FILES += NoRedirectAppSelectionViewController.m
 NoRedirectPrefs_FILES += NoRedirectHistoryViewController.m
+NoRedirectPrefs_FILES += LSApplicationProxy+NoRedirect.m
 NoRedirectPrefs_FILES += ../NoRedirectRecord.m
 
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
