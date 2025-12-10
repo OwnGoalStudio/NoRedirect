@@ -2,7 +2,7 @@ ifeq ($(THEOS_DEVICE_SIMULATOR),1)
 TARGET := simulator:clang:latest:14.0
 INSTALL_TARGET_PROCESSES := Preferences
 ARCHS := arm64 x86_64
-IPHONE_SIMULATOR_ROOT := $(shell devkit/sim-root.sh)
+IPHONE_SIMULATOR_ROOT := $(shell ../devkit/sim-root.sh)
 else
 TARGET := iphone:clang:16.5:14.0
 INSTALL_TARGET_PROCESSES := Preferences

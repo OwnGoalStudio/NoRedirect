@@ -4,6 +4,7 @@ ifeq ($(THEOS_DEVICE_SIMULATOR),1)
 TARGET := simulator:clang:latest:14.0
 INSTALL_TARGET_PROCESSES := SpringBoard SafariViewService
 ARCHS := arm64 x86_64
+IPHONE_SIMULATOR_ROOT := $(shell devkit/sim-root.sh)
 else
 TARGET := iphone:clang:16.5:14.0
 INSTALL_TARGET_PROCESSES := SpringBoard SafariViewService
@@ -25,8 +26,12 @@ NoRedirect_USE_MODULES := 0
 NoRedirect_FILES += NoRedirect.xm
 NoRedirect_FILES += NoRedirectRecord.m
 
+ifeq ($(THEOS_DEVICE_SIMULATOR),1)
+NoRedirect_FILES += libroot/dyn.c
+else
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
 NoRedirect_FILES += libroot/dyn.c
+endif
 endif
 
 NoRedirect_CFLAGS += -fobjc-arc
@@ -42,12 +47,31 @@ NoRedirect_LDFLAGS += -LLibraries
 endif
 endif
 
+ifeq ($(THEOS_DEVICE_SIMULATOR),1)
+NoRedirect_CFLAGS += -DIPHONE_SIMULATOR_ROOT=\"$(IPHONE_SIMULATOR_ROOT)\"
+NoRedirect_CFLAGS += -FFrameworks/_simulator
+NoRedirect_LDFLAGS += -FFrameworks/_simulator
+NoRedirect_LDFLAGS += -rpath /opt/simject
+else
+ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
+NoRedirect_CFLAGS += -FFrameworks/_rootless
+NoRedirect_LDFLAGS += -FFrameworks/_rootless
+else
+ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+NoRedirect_CFLAGS += -FFrameworks/_roothide
+NoRedirect_LDFLAGS += -FFrameworks/_roothide
+else
+NoRedirect_CFLAGS += -FFrameworks
+NoRedirect_LDFLAGS += -FFrameworks
+endif
+endif
+endif
+
 ifeq ($(THEOS_DEVICE_SIMULATOR),)
 NoRedirect_LIBRARIES += sandy
 endif
 
 NoRedirect_LIBRARIES += sqlite3
-NoRedirect_FRAMEWORKS += AltList
 NoRedirect_FRAMEWORKS += QuartzCore
 NoRedirect_PRIVATE_FRAMEWORKS += BannerKit
 
