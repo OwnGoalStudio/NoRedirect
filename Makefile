@@ -60,6 +60,7 @@ else
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
 NoRedirect_CFLAGS += -FFrameworks/_roothide
 NoRedirect_LDFLAGS += -FFrameworks/_roothide
+NoRedirect_LIBRARIES += roothide
 else
 NoRedirect_CFLAGS += -FFrameworks
 NoRedirect_LDFLAGS += -FFrameworks
@@ -83,10 +84,23 @@ TOOL_NAME := NoRedirectUI
 NoRedirectUI_USE_MODULES := 0
 
 NoRedirectUI_FILES += NoRedirectUI.mm
+
+ifeq ($(THEOS_DEVICE_SIMULATOR),1)
+NoRedirectUI_FILES += libroot/dyn.c
+else
+ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+NoRedirectUI_FILES += libroot/dyn.c
+endif
+endif
+
 NoRedirectUI_CFLAGS += -fobjc-arc
 NoRedirectUI_CFLAGS += -IHeaders
 NoRedirectUI_CODESIGN_FLAGS += -SNoRedirectUI.xml
 NoRedirectUI_INSTALL_PATH := /usr/libexec
+
+ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+NoRedirectUI_LIBRARIES += roothide
+endif
 
 NoRedirectUI_FRAMEWORKS += UIKit
 NoRedirectUI_PRIVATE_FRAMEWORKS += AppSupport

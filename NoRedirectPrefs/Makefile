@@ -47,6 +47,7 @@ else
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
 NoRedirectPrefs_CFLAGS += -FFrameworks/_roothide
 NoRedirectPrefs_LDFLAGS += -FFrameworks/_roothide
+NoRedirectPrefs_LIBRARIES += roothide
 else
 NoRedirectPrefs_CFLAGS += -FFrameworks
 NoRedirectPrefs_LDFLAGS += -FFrameworks
