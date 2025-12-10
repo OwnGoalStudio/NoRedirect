@@ -95,13 +95,34 @@ endif
 
 NoRedirectUI_CFLAGS += -fobjc-arc
 NoRedirectUI_CFLAGS += -IHeaders
-NoRedirectUI_CODESIGN_FLAGS += -SNoRedirectUI.xml
-NoRedirectUI_INSTALL_PATH := /usr/libexec
 
+ifeq ($(THEOS_DEVICE_SIMULATOR),1)
+NoRedirectUI_CFLAGS += -DIPHONE_SIMULATOR_ROOT=\"$(IPHONE_SIMULATOR_ROOT)\"
+NoRedirectUI_CFLAGS += -FFrameworks/_simulator
+NoRedirectUI_LDFLAGS += -FFrameworks/_simulator
+NoRedirectUI_LDFLAGS += -rpath /opt/simject
+else
+ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
+NoRedirectUI_CFLAGS += -FFrameworks/_rootless
+NoRedirectUI_LDFLAGS += -FFrameworks/_rootless
+else
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
+NoRedirectUI_CFLAGS += -FFrameworks/_roothide
+NoRedirectUI_LDFLAGS += -FFrameworks/_roothide
 NoRedirectUI_LIBRARIES += roothide
+else
+NoRedirectUI_CFLAGS += -FFrameworks
+NoRedirectUI_LDFLAGS += -FFrameworks
+endif
+endif
 endif
 
+ifeq ($(THEOS_DEVICE_SIMULATOR),1)
+NoRedirectUI_CODESIGN_FLAGS += -f -s - --entitlements Empty.xml
+else
+NoRedirectUI_CODESIGN_FLAGS += -SNoRedirectUI.xml
+endif
+NoRedirectUI_INSTALL_PATH := /usr/libexec
 NoRedirectUI_FRAMEWORKS += UIKit
 NoRedirectUI_PRIVATE_FRAMEWORKS += AppSupport
 
