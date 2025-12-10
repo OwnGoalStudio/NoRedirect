@@ -110,16 +110,22 @@ static void NRUSendBannerMessage(xpc_object_t message) {
         return;
     }
 
+    // Calculate banner timeout based on text length
+    NSTimeInterval bannerTimeout;
+    bannerTimeout = MIN(MAX((primaryTitle.length + secondaryTitle.length) * 0.1, 4.0), 10.0);
+
     if (@available(iOS 17, *)) {
         static _UISystemBannerRequest *bannerRequest;
         bannerRequest = [[objc_getClass("_UISystemBannerRequest") alloc] init];
         bannerRequest.primaryTitleText = primaryTitle;
         bannerRequest.secondaryTitleText = secondaryTitle;
-        bannerRequest.bannerTimeoutDuration = 4.0;
+        bannerRequest.bannerTimeoutDuration = bannerTimeout;
         [bannerRequest postBanner];
     } else {
+        // Not yet implemented for iOS versions below 17 with SBUIIsSystemApertureEnabled
+        // Which means no banner will be shown on iPhone with Dynamic Island
         xpc_object_t message = xpc_dictionary_create(NULL, NULL, 0);
-        xpc_dictionary_set_double(message, "BUISKeyBannerTimeout", 4.0);
+        xpc_dictionary_set_double(message, "BUISKeyBannerTimeout", bannerTimeout);
         xpc_dictionary_set_string(message, "BUISKeyType", "BUISKeyArgType");
         xpc_dictionary_set_string(message, "BUISKeyCCText", [primaryTitle UTF8String]);
         xpc_dictionary_set_string(message, "BUISKeyCCItemsText", [secondaryTitle UTF8String]);
