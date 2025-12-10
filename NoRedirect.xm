@@ -215,6 +215,11 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
         return NO;
     }
 
+    if ([srcId isEqualToString:destId]) {
+        HBLogDebug(@"> [ACCEPT] Source and destination are the same: %@", srcId);
+        return NO;
+    }
+
     if ([gUseLenientModeSources containsObject:srcId]) {
         HBLogDebug(@"> [ACCEPT] %@ is in lenient mode", srcId);
 
