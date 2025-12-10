@@ -71,6 +71,7 @@
 @end
 
 static BOOL gEnabled = YES;
+static BOOL gBannerEnabled = YES;
 static BOOL gRecordingEnabled = NO;
 static BOOL gIsSafariViewService = NO;
 
@@ -104,8 +105,11 @@ static void ReloadPrefs(void) {
     NSDictionary *settings = [prefs dictionaryRepresentation];
 
     gEnabled = settings[@"IsEnabled"] ? [settings[@"IsEnabled"] boolValue] : YES;
+    gBannerEnabled = settings[@"IsBannerEnabled"] ? [settings[@"IsBannerEnabled"] boolValue] : YES;
     gRecordingEnabled = settings[@"IsRecordingEnabled"] ? [settings[@"IsRecordingEnabled"] boolValue] : NO;
-    HBLogDebug(@"Enabled: %@, Recording Enabled: %@", gEnabled ? @"YES" : @"NO", gRecordingEnabled ? @"YES" : @"NO");
+
+    HBLogDebug(@"Enabled: %@, Banner Enabled: %@, Recording Enabled: %@", gEnabled ? @"YES" : @"NO",
+               gBannerEnabled ? @"YES" : @"NO", gRecordingEnabled ? @"YES" : @"NO");
 
     NSMutableSet *forbiddenLaunchSources = [NSMutableSet set];
     for (NSString *key in settings) {
@@ -421,7 +425,7 @@ static NSBundle *NRUSupportBundle(void) {
     if (ShouldDeclineRequest(fromAppId, toAppId)) {
         RecordRequest(fromAppId, toAppId, YES);
 
-        if (fromAppName && toAppName) {
+        if (gBannerEnabled && fromAppName && toAppName) {
             NSString *primaryTitle =
                 NSLocalizedStringFromTableInBundle(@"No Redirect", @"Tweak", NRUSupportBundle(), @"");
             NSString *secondaryFmt = NSLocalizedStringFromTableInBundle(@"“%@” is not allowed to open “%@”.", @"Tweak",

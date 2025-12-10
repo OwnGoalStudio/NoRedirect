@@ -28,6 +28,8 @@
 
 "Reset All…" = "重置所有选项…";
 
+"Show Denied Banner" = "显示阻止横幅";
+
 "These records will be cleared each time you reboot your device." = "每次重启设备时都会清理这些记录。";
 
 "This tweak is designed to prevent redirections from Safari, Chrome, and other apps to the App Store, Safari, and other apps." = "此插件旨在阻止 Safari、Chrome 和其他应用程序之间的重定向。";
