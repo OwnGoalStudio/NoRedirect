@@ -1,7 +1,10 @@
+#import <AppSupport/CPDistributedMessagingCenter.h>
+#import <MobileCoreServices/MobileCoreServices.h>
 #import <UIKit/UIKit.h>
 
-#import <libSandy.h>
 #import <HBLog.h>
+#import <libSandy.h>
+#import <libroot.h>
 
 #import "NoRedirectRecord.h"
 
@@ -20,6 +23,7 @@
 
 @interface SBApplication : NSObject
 @property(nonatomic, copy, readonly) NSString *bundleIdentifier;
+@property(nonatomic, copy, readonly) NSString *displayName;
 @property(nonatomic, strong, readonly) SBApplicationProcessState *processState;
 @end
 
@@ -84,6 +88,7 @@ static NSSet<NSString *> *gCustomAllowedMappings = nil;
 static NSSet<NSString *> *gCustomForbiddenMappings = nil;
 
 static NSMutableDictionary<NSString *, NSNumber *> *gLastTransitionStamps = nil;
+static CPDistributedMessagingCenter *gMessagingCenter = nil;
 
 static void ReloadPrefs(void) {
     static NSUserDefaults *prefs = nil;
@@ -291,15 +296,19 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
     [NoRedirectRecord insertRecord:declined source:srcId target:destId];
 }
 
-%group NoRedirectPrimary
+static NSBundle *NRUSupportBundle(void) {
+    static NSBundle *bundle = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+      NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"NoRedirectPrefs" ofType:@"bundle"];
+      NSString *aliasBundlePath;
+      aliasBundlePath = JBROOT_PATH_NSSTRING(@"/Library/PreferenceBundles/NoRedirectPrefs.bundle");
+      bundle = [NSBundle bundleWithPath:tweakBundlePath ?: aliasBundlePath];
+    });
+    return bundle;
+}
 
-// %hook FBSystemService
-// 
-// - (void)_reallyActivateApplication:(id)arg1 requestID:(id)arg2 options:(id)arg3 source:(id)arg4 originalSource:(id)arg5 isTrusted:(BOOL)arg6 sequenceNumber:(unsigned long long)arg7 cacheGUID:(id)arg8 ourSequenceNumber:(unsigned long long)arg9 ourCacheGUID:(id)arg10 withResult:(/*^block*/id)arg11 {
-//     %log; %orig;
-// }
-// 
-// %end
+%group NoRedirectPrimary
 
 %hook SBMainWorkspace
 
@@ -360,6 +369,7 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
     }
 
     NSString *fromAppId = nil;
+    NSString *fromAppName = nil;
     SBApplicationSceneEntity *fromEntity = request.fromApplicationSceneEntities.anyObject;
     if (fromEntity) {
         id fromAction = fromEntity.actions.anyObject;
@@ -373,6 +383,7 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
         }
 
         fromAppId = fromEntity.application.bundleIdentifier;
+        fromAppName = fromEntity.application.displayName;
     } else {
         NSString *fromProcessName = request.originatingProcess.name;
         if (isFromBreadcrumb || [fromProcessName isEqualToString:@"lsd"]) {
@@ -393,9 +404,38 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
 
     fromAppId = fromAppId ?: request.originatingProcess.bundleIdentifier;
     SBApplicationSceneEntity *toEntity = request.toApplicationSceneEntities.anyObject;
+
     NSString *toAppId = toEntity.application.bundleIdentifier;
+    NSString *toAppName = toEntity.application.displayName;
+
+    if (!fromAppName && fromAppId) {
+        LSApplicationProxy *fromAppProxy = [LSApplicationProxy applicationProxyForIdentifier:fromAppId];
+        fromAppName = fromAppProxy.localizedShortName;
+    }
+
+    if (!toAppName && toAppId) {
+        LSApplicationProxy *toAppProxy = [LSApplicationProxy applicationProxyForIdentifier:toAppId];
+        toAppName = toAppProxy.localizedShortName;
+    }
+
     if (ShouldDeclineRequest(fromAppId, toAppId)) {
         RecordRequest(fromAppId, toAppId, YES);
+
+        if (fromAppName && toAppName) {
+            NSString *primaryTitle =
+                NSLocalizedStringFromTableInBundle(@"No Redirect", @"Tweak", NRUSupportBundle(), @"");
+            NSString *secondaryFmt = NSLocalizedStringFromTableInBundle(@"“%@” is not allowed to open “%@”.", @"Tweak",
+                                                                        NRUSupportBundle(), @"");
+            if (primaryTitle && secondaryFmt) {
+                NSString *secondaryTitle = [NSString stringWithFormat:secondaryFmt, fromAppName, toAppName];
+                NSDictionary *userInfo = @{
+                    @"primaryTitle" : primaryTitle,
+                    @"secondaryTitle" : secondaryTitle,
+                };
+
+                [gMessagingCenter sendMessageName:@"PostDeniedBanner" userInfo:userInfo];
+            }
+        }
 
         if ([gUseHandledSimulationSources containsObject:fromAppId]) {
             BOOL isStoreKitUI = [toAppId isEqualToString:@"com.apple.ios.StoreKitUIService"];
@@ -477,11 +517,16 @@ static void RecordRequest(NSString *srcId, NSString *destId, BOOL declined) {
     );
 
     if ([processName isEqualToString:@"SpringBoard"]) {
+        gMessagingCenter = [CPDistributedMessagingCenter centerNamed:@"com.82flex.noredirect.ui"];
         [NoRedirectRecord clearAllRecordsBeforeBoot];
         %init(NoRedirectPrimary);
     } else if ([processName isEqualToString:@"SafariViewService"]) {
         %init(NoRedirectSafari);
     }
 
-    HBLogWarn(@"NoRedirect initialized");
+    if (gMessagingCenter) {
+        HBLogDebug(@"NoRedirect initialized in process %@ with messaging center %@", processName, gMessagingCenter);
+    } else {
+        HBLogDebug(@"NoRedirect initialized in process %@", processName);
+    }
 }

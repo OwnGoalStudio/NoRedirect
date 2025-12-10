@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+exec 3>&1 &>/dev/null
+
+if [ "$DPKG_MAINTSCRIPT_ARCH" == "iphoneos-arm64" ]; then
+    DPKG_ROOT="/var/jb"
+fi
+
+SERV_AGENT="$DPKG_ROOT/Library/LaunchDaemons/com.82flex.noredirect.plist"
+
+if [ -f "$SERV_AGENT" ]; then
+    launchctl unload "$SERV_AGENT" || true
+else
+    launchctl remove system/com.82flex.noredirect || true
+fi
+
+exit 0

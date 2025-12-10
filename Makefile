@@ -72,10 +72,31 @@ NoRedirect_LIBRARIES += sandy
 endif
 
 NoRedirect_LIBRARIES += sqlite3
+NoRedirect_FRAMEWORKS += CoreServices
 NoRedirect_FRAMEWORKS += QuartzCore
-NoRedirect_PRIVATE_FRAMEWORKS += BannerKit
+NoRedirect_PRIVATE_FRAMEWORKS += AppSupport
 
 include $(THEOS_MAKE_PATH)/tweak.mk
+
+TOOL_NAME := NoRedirectUI
+
+NoRedirectUI_USE_MODULES := 0
+
+NoRedirectUI_FILES += NoRedirectUI.mm
+NoRedirectUI_CFLAGS += -fobjc-arc
+NoRedirectUI_CFLAGS += -IHeaders
+NoRedirectUI_CODESIGN_FLAGS += -SNoRedirectUI.xml
+NoRedirectUI_INSTALL_PATH := /usr/libexec
+
+NoRedirectUI_FRAMEWORKS += UIKit
+NoRedirectUI_PRIVATE_FRAMEWORKS += AppSupport
+
+include $(THEOS_MAKE_PATH)/tool.mk
+
+export THEOS_PACKAGE_SCHEME
+export THEOS_STAGING_DIR
+before-package::
+	@devkit/before-package.sh
 
 export THEOS_OBJ_DIR
 after-all::
