@@ -231,12 +231,11 @@ static void ReloadPrefs(void) {
 }
 
 static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
-    HBLogDebug(@"Checking if %@ should be allowed to launch %@", srcId, destId);
-
     if (!srcId || !destId) {
-        HBLogDebug(@"> [ACCEPT] Invalid source or destination");
         return NO;
     }
+
+    HBLogDebug(@"Checking if %@ should be allowed to launch %@", srcId, destId);
 
     if (!gEnabled) {
         HBLogDebug(@"> [ACCEPT] NoRedirect is disabled");
@@ -443,13 +442,15 @@ static NSBundle *NRUSupportBundle(void) {
     SBApplicationSceneEntity *toEntity = request.toApplicationSceneEntities.anyObject;
 
     NSString *toAppId = toEntity.application.bundleIdentifier;
-    NSString *toAppName = toEntity.application.displayName;
+    if (fromAppId && toAppId && [fromAppId isEqualToString:toAppId]) {
+        return %orig;
+    }
 
+    NSString *toAppName = toEntity.application.displayName;
     if (!fromAppName && fromAppId) {
         LSApplicationProxy *fromAppProxy = [LSApplicationProxy applicationProxyForIdentifier:fromAppId];
         fromAppName = fromAppProxy.localizedName;
     }
-
     if (!toAppName && toAppId) {
         LSApplicationProxy *toAppProxy = [LSApplicationProxy applicationProxyForIdentifier:toAppId];
         toAppName = toAppProxy.localizedName;
@@ -512,6 +513,7 @@ static NSBundle *NRUSupportBundle(void) {
 
     NSString *fromAppId = [self _hostApplicationBundleIdentifier];
     NSString *toAppId = @"com.apple.SafariViewService";
+
     if (ShouldDeclineRequest(fromAppId, toAppId)) {
         if ([gUseHandledSimulationSources containsObject:fromAppId]) {
             HBLogDebug(@"Dismissed Safari View Services (Handled)");
@@ -548,6 +550,10 @@ static NSBundle *NRUSupportBundle(void) {
         toAppId = @"com.apple.AppStore";
     }
     if (!toAppId) {
+        return process;
+    }
+
+    if ([fromAppId isEqualToString:toAppId]) {
         return process;
     }
 
