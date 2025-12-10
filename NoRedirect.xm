@@ -447,12 +447,12 @@ static NSBundle *NRUSupportBundle(void) {
 
     if (!fromAppName && fromAppId) {
         LSApplicationProxy *fromAppProxy = [LSApplicationProxy applicationProxyForIdentifier:fromAppId];
-        fromAppName = fromAppProxy.localizedShortName;
+        fromAppName = fromAppProxy.localizedName;
     }
 
     if (!toAppName && toAppId) {
         LSApplicationProxy *toAppProxy = [LSApplicationProxy applicationProxyForIdentifier:toAppId];
-        toAppName = toAppProxy.localizedShortName;
+        toAppName = toAppProxy.localizedName;
     }
 
     if (ShouldDeclineRequest(fromAppId, toAppId)) {
