@@ -20,4 +20,6 @@ if [ -f "$SERV_AGENT" ]; then
     launchctl load -w -F "$SERV_AGENT" || true
 fi
 
+killall -TERM runningboardd || true
+
 exit 0

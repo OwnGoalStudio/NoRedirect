@@ -4,6 +4,7 @@
 #import <HBLog.h>
 #import <dlfcn.h>
 #import <libroot.h>
+#import <mach-o/dyld.h>
 #import <objc/runtime.h>
 #import <xpc/xpc.h>
 
@@ -49,6 +50,79 @@ static void NRUSendBannerMessage(xpc_object_t message) {
     }
 }
 
+#pragma mark - Bundle
+
+static NSString *nruExecutablePath(void) {
+    static NSString *sPath = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+      // Resolve executable path
+      uint32_t sz = 0;
+      _NSGetExecutablePath(NULL, &sz); // query size
+      char *exeBuf = (char *)malloc(sz > 0 ? sz : PATH_MAX);
+      if (!exeBuf)
+          return;
+      if (_NSGetExecutablePath(exeBuf, &sz) != 0) {
+          // Fallback: leave exeBuf as-is
+      }
+
+      // Canonicalize
+      char realBuf[PATH_MAX];
+      const char *exePath = realpath(exeBuf, realBuf) ? realBuf : exeBuf;
+      NSString *exe = [NSString stringWithUTF8String:exePath ? exePath : ""];
+      free(exeBuf);
+
+      sPath = exe ?: [[NSProcessInfo processInfo] arguments][0];
+    });
+    return sPath;
+}
+
+static NSBundle *nruResourceBundle(void) {
+    static NSBundle *sBundle = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+      NSString *exe = nruExecutablePath();
+      NSString *exeDir = [exe stringByDeletingLastPathComponent];
+      NSString *resRel = @"../../Library/PreferenceBundles/NoRedirectPrefs.bundle";
+      NSString *resPath = [[exeDir stringByAppendingPathComponent:resRel] stringByStandardizingPath];
+      NSBundle *resBundle = resPath ? [NSBundle bundleWithPath:resPath] : nil;
+      if (!resBundle)
+          return;
+
+      sBundle = resBundle;
+    });
+    return sBundle;
+}
+
+static NSBundle *nruLocalizationBundle(void) {
+    static NSBundle *sBundle = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+      NSBundle *resBundle = nruResourceBundle();
+
+      NSArray<NSString *> *languages = [[NSUserDefaults standardUserDefaults] objectForKey:@"AppleLanguages"] ?: @"en";
+
+      NSString *localizablePath = nil;
+      for (NSString *localization in [NSBundle preferredLocalizationsFromArray:[resBundle localizations]
+                                                                forPreferences:languages]) {
+          localizablePath = [resBundle pathForResource:@"Localizable"
+                                                ofType:@"strings"
+                                           inDirectory:nil
+                                       forLocalization:localization];
+          if (localizablePath && localizablePath.length > 0)
+              break;
+      }
+
+      NSString *lprojPath = [localizablePath stringByDeletingLastPathComponent];
+      if (lprojPath && lprojPath.length > 0) {
+          resBundle = [NSBundle bundleWithPath:lprojPath];
+      }
+
+      sBundle = resBundle;
+    });
+    return sBundle;
+}
+
 @interface NoRedirectViewService : NSObject
 @end
 
@@ -65,18 +139,6 @@ static void NRUSendBannerMessage(xpc_object_t message) {
       sharedInstance = [[self alloc] init];
     });
     return sharedInstance;
-}
-
-+ (NSBundle *)nru_supportBundle {
-    static NSBundle *bundle = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-      NSString *tweakBundlePath = [[NSBundle mainBundle] pathForResource:@"NoRedirectPrefs" ofType:@"bundle"];
-      NSString *aliasBundlePath;
-      aliasBundlePath = JBROOT_PATH_NSSTRING(@"/Library/PreferenceBundles/NoRedirectPrefs.bundle");
-      bundle = [NSBundle bundleWithPath:tweakBundlePath ?: aliasBundlePath];
-    });
-    return bundle;
 }
 
 - (instancetype)init {
@@ -107,7 +169,21 @@ static void NRUSendBannerMessage(xpc_object_t message) {
     NSString *primaryTitle = userInfo[@"primaryTitle"];
     NSString *secondaryTitle = userInfo[@"secondaryTitle"];
     if (![primaryTitle isKindOfClass:[NSString class]] || ![secondaryTitle isKindOfClass:[NSString class]]) {
-        return;
+        NSString *fromAppName = userInfo[@"fromAppName"];
+        NSString *toAppName = userInfo[@"toAppName"];
+        if (![fromAppName isKindOfClass:[NSString class]] || ![toAppName isKindOfClass:[NSString class]]) {
+            return;
+        }
+
+        NSBundle *localizationBundle = nruLocalizationBundle();
+        primaryTitle = NSLocalizedStringFromTableInBundle(@"No Redirect", @"Tweak", localizationBundle, @"");
+        NSString *secondaryFmt =
+            NSLocalizedStringFromTableInBundle(@"“%@” is not allowed to open “%@”.", @"Tweak", localizationBundle, @"");
+        if (!primaryTitle || !secondaryFmt) {
+            return;
+        }
+
+        secondaryTitle = [NSString stringWithFormat:secondaryFmt, fromAppName, toAppName];
     }
 
     // Calculate banner timeout based on text length

@@ -9,6 +9,10 @@
 			<string>com.apple.springboard</string>
 			<string>com.apple.SafariViewService</string>
 		</array>
+		<key>Executables</key>
+		<array>
+			<string>runningboardd</string>
+		</array>
 	</dict>
 </dict>
 </plist>

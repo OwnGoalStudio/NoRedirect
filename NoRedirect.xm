@@ -70,10 +70,38 @@
 - (void)_dismiss;
 @end
 
+@interface RBSProcessBundle : NSObject
+@property(readonly, copy, nonatomic) NSString *identifier;
+- (id)bundleInfoValueForKey:(NSString *)arg1;
+@end
+
+@interface RBSProcessHandle : NSObject
+@property(readonly, nonatomic) RBSProcessBundle *bundle;
+@end
+
+@interface RBProcess : NSObject
+@property(nonatomic, copy, readonly) RBSProcessHandle *handle;
+@end
+
+@interface RBSProcessIdentity : NSObject
+@property(readonly, copy, nonatomic) NSString *xpcServiceIdentifier;
++ (instancetype)identityForXPCServiceIdentifier:(NSString *)arg1;
+@end
+
+@interface RBSLaunchContext : NSObject
+@property(nonatomic, retain) RBProcess *hostProcess;
+@property(copy, nonatomic) RBSProcessIdentity *identity;
+@end
+
+@interface RBSLaunchRequest : NSObject
+@property(nonatomic, readonly) RBSLaunchContext *context;
+@end
+
 static BOOL gEnabled = YES;
 static BOOL gBannerEnabled = YES;
 static BOOL gRecordingEnabled = NO;
 static BOOL gIsSafariViewService = NO;
+static BOOL gIsRunningBoardDaemon = NO;
 
 static NSSet<NSString *> *gForbiddenLaunchSources = nil;
 static NSSet<NSString *> *gForbiddenLaunchDestinations = nil;
@@ -94,7 +122,7 @@ static CPDistributedMessagingCenter *gMessagingCenter = nil;
 static void ReloadPrefs(void) {
     static NSUserDefaults *prefs = nil;
     if (!prefs) {
-        if (gIsSafariViewService) {
+        if (gIsSafariViewService || gIsRunningBoardDaemon) {
             prefs = [[NSUserDefaults alloc]
                 initWithSuiteName:@"/var/mobile/Library/Preferences/com.82flex.noredirectprefs.plist"];
         } else {
@@ -435,13 +463,13 @@ static NSBundle *NRUSupportBundle(void) {
                 NSLocalizedStringFromTableInBundle(@"No Redirect", @"Tweak", NRUSupportBundle(), @"");
             NSString *secondaryFmt = NSLocalizedStringFromTableInBundle(@"“%@” is not allowed to open “%@”.", @"Tweak",
                                                                         NRUSupportBundle(), @"");
+
             if (primaryTitle && secondaryFmt) {
                 NSString *secondaryTitle = [NSString stringWithFormat:secondaryFmt, fromAppName, toAppName];
                 NSDictionary *userInfo = @{
                     @"primaryTitle" : primaryTitle,
                     @"secondaryTitle" : secondaryTitle,
                 };
-
                 [gMessagingCenter sendMessageName:@"PostDeniedBanner" userInfo:userInfo];
             }
         }
@@ -496,6 +524,70 @@ static NSBundle *NRUSupportBundle(void) {
 
 %end
 
+%group NoRedirectRunningBoard
+
+%hook RBProcessManager
+
+- (id)executeLaunchRequest:(RBSLaunchRequest *)request withError:(NSError **)errorPtr {
+    id process = %orig;
+
+    RBSProcessBundle *bundle = request.context.hostProcess.handle.bundle;
+    NSString *fromAppId = bundle.identifier;
+    if (!fromAppId) {
+        return process;
+    }
+
+    NSString *toAppId = nil;
+    RBSProcessIdentity *identity = request.context.identity;
+    if (![identity respondsToSelector:@selector(xpcServiceIdentifier)]) {
+        return process;
+    }
+
+    NSString *toXpcId = identity.xpcServiceIdentifier;
+    if ([toXpcId hasPrefix:@"com.apple.AppStore."]) {
+        toAppId = @"com.apple.AppStore";
+    }
+    if (!toAppId) {
+        return process;
+    }
+
+    if (ShouldDeclineRequest(fromAppId, toAppId)) {
+        RecordRequest(fromAppId, toAppId, YES);
+
+        if ([bundle respondsToSelector:@selector(bundleInfoValueForKey:)]) {
+            NSString *fromAppName = [bundle bundleInfoValueForKey:@"CFBundleDisplayName"];
+            NSString *toAppName = @"App Store";
+
+            if (gBannerEnabled && fromAppName && toAppName) {
+                NSDictionary *userInfo = @{
+                    @"fromAppName" : fromAppName,
+                    @"toAppName" : toAppName,
+                };
+                [gMessagingCenter sendMessageName:@"PostDeniedBanner" userInfo:userInfo];
+            }
+        }
+
+        if (errorPtr) {
+            NSDictionary *userInfo = @{
+                NSLocalizedDescriptionKey : @"Launch declined by No Redirect",
+                NSLocalizedFailureReasonErrorKey :
+                    [NSString stringWithFormat:@"%@ is not allowed to launch %@.", fromAppId, toAppId],
+            };
+
+            *errorPtr = [NSError errorWithDomain:@"com.82flex.noredirect" code:1 userInfo:userInfo];
+        }
+
+        return nil;
+    }
+
+    RecordRequest(fromAppId, toAppId, NO);
+    return process;
+}
+
+%end
+
+%end
+
 %ctor {
     NSString *processName = [[NSProcessInfo processInfo] processName];
 
@@ -512,6 +604,14 @@ static NSBundle *NRUSupportBundle(void) {
             return;
         }
         gIsSafariViewService = YES;
+    } else if ([processName isEqualToString:@"runningboardd"]) {
+        int ret;
+        ret = libSandy_applyProfile("NoRedirectUI");
+        if (ret == kLibSandyErrorXPCFailure) {
+            HBLogError(@"Failed to apply libSandy profile");
+            return;
+        }
+        gIsRunningBoardDaemon = YES;
     }
 #endif
 
@@ -525,10 +625,15 @@ static NSBundle *NRUSupportBundle(void) {
         CFNotificationSuspensionBehaviorCoalesce
     );
 
-    if ([processName isEqualToString:@"SpringBoard"]) {
+    if ([processName isEqualToString:@"SpringBoard"] || [processName isEqualToString:@"runningboardd"]) {
         gMessagingCenter = [CPDistributedMessagingCenter centerNamed:@"com.82flex.noredirect.ui"];
+    }
+
+    if ([processName isEqualToString:@"SpringBoard"]) {
         [NoRedirectRecord clearAllRecordsBeforeBoot];
         %init(NoRedirectPrimary);
+    } else if ([processName isEqualToString:@"runningboardd"]) {
+        %init(NoRedirectRunningBoard);
     } else if ([processName isEqualToString:@"SafariViewService"]) {
         %init(NoRedirectSafari);
     }

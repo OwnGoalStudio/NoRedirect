@@ -14,4 +14,6 @@ else
     launchctl remove system/com.82flex.noredirect || true
 fi
 
+killall -TERM runningboardd || true
+
 exit 0
