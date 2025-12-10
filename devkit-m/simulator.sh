@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export THEOS=$HOME/theos
+export THEOS="$HOME/theos"
 export THEOS_PACKAGE_SCHEME=
 export THEOS_DEVICE_IP=
 export THEOS_DEVICE_PORT=

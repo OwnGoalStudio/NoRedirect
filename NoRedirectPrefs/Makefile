@@ -2,8 +2,9 @@ ifeq ($(THEOS_DEVICE_SIMULATOR),1)
 TARGET := simulator:clang:latest:14.0
 INSTALL_TARGET_PROCESSES := Preferences
 ARCHS := arm64 x86_64
+IPHONE_SIMULATOR_ROOT := $(shell devkit/sim-root.sh)
 else
-TARGET := iphone:clang:latest:14.0
+TARGET := iphone:clang:16.5:14.0
 INSTALL_TARGET_PROCESSES := Preferences
 ARCHS := arm64 arm64e
 endif
@@ -11,6 +12,8 @@ endif
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME := NoRedirectPrefs
+
+NoRedirectPrefs_USE_MODULES := 0
 
 NoRedirectPrefs_FILES += NoRedirectRootListController.m
 NoRedirectPrefs_FILES += NoRedirectAppListController.m
@@ -20,14 +23,19 @@ NoRedirectPrefs_FILES += NoRedirectHistoryViewController.m
 NoRedirectPrefs_FILES += LSApplicationProxy+NoRedirect.m
 NoRedirectPrefs_FILES += ../NoRedirectRecord.m
 
+ifeq ($(THEOS_DEVICE_SIMULATOR),1)
+NoRedirectPrefs_FILES += ../libroot/dyn.c
+else
 ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
 NoRedirectPrefs_FILES += ../libroot/dyn.c
+endif
 endif
 
 NoRedirectPrefs_CFLAGS += -fobjc-arc
 NoRedirectPrefs_CFLAGS += -I..
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),1)
+NoRedirectPrefs_CFLAGS += -DIPHONE_SIMULATOR_ROOT=\"$(IPHONE_SIMULATOR_ROOT)\"
 NoRedirectPrefs_CFLAGS += -FFrameworks/_simulator
 NoRedirectPrefs_LDFLAGS += -FFrameworks/_simulator
 NoRedirectPrefs_LDFLAGS += -rpath /opt/simject
@@ -46,6 +54,8 @@ endif
 endif
 endif
 
+NoRedirectPrefs_LIBRARIES += sqlite3
+NoRedirectPrefs_FRAMEWORKS += QuartzCore
 NoRedirectPrefs_FRAMEWORKS += UIKit
 NoRedirectPrefs_EXTRA_FRAMEWORKS += AltList
 NoRedirectPrefs_PRIVATE_FRAMEWORKS += CoreServices

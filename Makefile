@@ -5,7 +5,7 @@ TARGET := simulator:clang:latest:14.0
 INSTALL_TARGET_PROCESSES := SpringBoard SafariViewService
 ARCHS := arm64 x86_64
 else
-TARGET := iphone:clang:latest:14.0
+TARGET := iphone:clang:16.5:14.0
 INSTALL_TARGET_PROCESSES := SpringBoard SafariViewService
 ARCHS := arm64 arm64e
 endif
@@ -19,6 +19,8 @@ SUBPROJECTS += NoRedirectPrefs
 include $(THEOS_MAKE_PATH)/aggregate.mk
 
 TWEAK_NAME := NoRedirect
+
+NoRedirect_USE_MODULES := 0
 
 NoRedirect_FILES += NoRedirect.xm
 NoRedirect_FILES += NoRedirectRecord.m
@@ -43,6 +45,11 @@ endif
 ifeq ($(THEOS_DEVICE_SIMULATOR),)
 NoRedirect_LIBRARIES += sandy
 endif
+
+NoRedirect_LIBRARIES += sqlite3
+NoRedirect_FRAMEWORKS += AltList
+NoRedirect_FRAMEWORKS += QuartzCore
+NoRedirect_PRIVATE_FRAMEWORKS += BannerKit
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
