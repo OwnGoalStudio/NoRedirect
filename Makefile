@@ -2,7 +2,6 @@ export PACKAGE_VERSION := 2.1
 
 ifeq ($(THEOS_DEVICE_SIMULATOR),1)
 TARGET := simulator:clang:latest:14.0
-INSTALL_TARGET_PROCESSES := SpringBoard SafariViewService
 ARCHS := arm64 x86_64
 IPHONE_SIMULATOR_ROOT := $(shell devkit/sim-root.sh)
 else
