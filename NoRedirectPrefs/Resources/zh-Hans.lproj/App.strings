@@ -12,7 +12,7 @@
 
 "As Hotspot Helper" = "作为 Wi-Fi 助理";
 
-"Preventing Auto-Run" = "自启动拦截";
+"Background Refresh & Prewarming" = "后台刷新与预热";
 
 "Block Applications" = "拦截应用程序";
 
@@ -42,6 +42,8 @@
 
 "Pause all blocks automatically in 10 seconds each time when application become active." = "每次应用程序进入前台 10 秒后自动暂停所有拦截。";
 
+"Preventing Auto-Run" = "自启动拦截";
+
 "Safari" = "Safari 浏览器";
 
 "Save" = "保存";
@@ -51,6 +53,8 @@
 "Simulation" = "模拟";
 
 "Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL." = "告诉调用者重定向已成功处理。这可能导致调用者停止尝试其他备用方法来打开 URL。";
+
+"To prevent apps from launching automatically in specific ways, enable the corresponding option. To manage background refresh settings in bulk, go to Settings → General → Background App Refresh." = "如需禁止 App 以特定方式自启动，打开对应选项。如需批量管理后台刷新，建议前往设置 → 通用 → 后台 App 刷新。";
 
 "“%@”" = "“%@”";
 

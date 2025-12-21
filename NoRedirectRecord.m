@@ -134,8 +134,18 @@
     }
 }
 
-- (BOOL)isTrusted {
-    return [self.source isEqualToString:@"com.apple.configd"];
+- (BOOL)isSourceTrusted {
+    return [self.source isEqualToString:@"com.apple.configd"] || [self.source hasPrefix:@"com.apple.dasd"];
+}
+
+- (NSString *)sourceIcon {
+    if ([self.source isEqualToString:@"com.apple.configd"]) {
+        return @"🛜";
+    } else if ([self.source isEqualToString:@"com.apple.dasd"]) {
+        return @"🔥";
+    } else {
+        return @"✅";
+    }
 }
 
 @end

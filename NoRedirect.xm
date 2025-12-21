@@ -110,6 +110,7 @@ static NSSet<NSString *> *gForbiddenLaunchSourcesForAppStore = nil;
 static NSSet<NSString *> *gForbiddenLaunchSourcesForSafariServices = nil;
 
 static NSSet<NSString *> *gForbiddenHotspotHandlers = nil;
+static NSSet<NSString *> *gForbiddenPrewarmDestinations = nil;
 
 static NSSet<NSString *> *gUseLenientModeSources = nil;
 static NSSet<NSString *> *gUseHandledSimulationSources = nil;
@@ -170,6 +171,16 @@ static void ReloadPrefs(void) {
     }
     gForbiddenHotspotHandlers = [forbiddenHotspotHandlers copy];
     HBLogDebug(@"Forbidden Hotspot Handlers: %@", forbiddenHotspotHandlers);
+
+    NSMutableSet *forbiddenPrewarmDestinations = [NSMutableSet set];
+    for (NSString *key in settings) {
+        if ([key hasPrefix:@"IsBlockedFromBeingPrewarmed/"] && [settings[key] boolValue]) {
+            NSString *appId = [key substringFromIndex:28];
+            [forbiddenPrewarmDestinations addObject:appId];
+        }
+    }
+    gForbiddenPrewarmDestinations = [forbiddenPrewarmDestinations copy];
+    HBLogDebug(@"Forbidden Prewarm Destinations: %@", forbiddenPrewarmDestinations);
 
     NSMutableSet *forbiddenLaunchSourcesForAppStore = [NSMutableSet set];
     for (NSString *key in settings) {
@@ -286,6 +297,11 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
 
     if ([srcId isEqualToString:@"com.apple.configd"] && [gForbiddenHotspotHandlers containsObject:destId]) {
         HBLogDebug(@"> [REJECT] %@ is forbidden from being launched as Hotspot Helper", destId);
+        return YES;
+    }
+
+    if ([srcId isEqualToString:@"com.apple.dasd"] && [gForbiddenPrewarmDestinations containsObject:destId]) {
+        HBLogDebug(@"> [REJECT] %@ is forbidden from being prewarmed", destId);
         return YES;
     }
 

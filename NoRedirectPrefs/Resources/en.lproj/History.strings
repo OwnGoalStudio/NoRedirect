@@ -1,4 +1,4 @@
-"Allowed on %@" = "✅ Allowed on %@";
+"%@ Allowed on %@" = "%@ Allowed on %@";
 
 "Are you sure you want to clear the redirect history?" = "Are you sure you want to clear the redirect history?";
 
@@ -42,4 +42,4 @@
 
 "1 auto-run" = "1 auto-run";
 
-"%@ auto-run (Hotspot)" = "%@ auto-run (Hotspot)";
+"%@ auto-run" = "%@ auto-run";

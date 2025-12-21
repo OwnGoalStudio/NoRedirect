@@ -141,8 +141,8 @@
                     continue;
                 }
 
-                BOOL isBeingLaunchedAsHotspotHandler = [record.source isEqualToString:@"com.apple.configd"];
-                BOOL isAutorun = (isBeingLaunchedAsHotspotHandler);
+                BOOL isAutorun = ([record.source isEqualToString:@"com.apple.configd"] ||
+                                  [record.source isEqualToString:@"com.apple.dasd"]);
 
                 LSApplicationProxy *srcProxy;
                 if (isAutorun) {
@@ -182,11 +182,13 @@
                     continue;
                 }
 
-                if (isBeingLaunchedAsHotspotHandler) {
-                    specifier.name = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(
-                                                                    @"%@ auto-run (Hotspot)", @"History",
-                                                                    [NSBundle bundleForClass:[self class]], nil),
-                                                                srcProxy.nrt_nameToDisplay];
+                if (isAutorun) {
+                    NSString *eventName;
+                    eventName = [NSString
+                        stringWithFormat:NSLocalizedStringFromTableInBundle(
+                                             @"%@ auto-run", @"History", [NSBundle bundleForClass:[self class]], nil),
+                                         srcProxy.nrt_nameToDisplay];
+                    specifier.name = eventName;
                 } else {
                     specifier.name = [NSString
                         stringWithFormat:@"%@  ❯  %@", srcProxy.nrt_nameToDisplay, targetProxy.nrt_nameToDisplay];
@@ -237,8 +239,8 @@
                     continue;
                 }
 
-                BOOL isBeingLaunchedAsHotspotHandler = [record.source isEqualToString:@"com.apple.configd"];
-                BOOL isAutorun = (isBeingLaunchedAsHotspotHandler);
+                BOOL isAutorun = ([record.source isEqualToString:@"com.apple.configd"] ||
+                                  [record.source isEqualToString:@"com.apple.dasd"]);
 
                 NSString *srcId;
                 LSApplicationProxy *srcProxy;
@@ -424,7 +426,7 @@
                                                                     [NSBundle bundleForClass:[self class]], nil),
                                  [[NoRedirectHistoryViewController shortDateTimeFormatter]
                                      stringFromDate:record.createdAt]];
-        } else if (!record.isTrusted) {
+        } else if (!record.isSourceTrusted) {
             return [NSString
                 stringWithFormat:NSLocalizedStringFromTableInBundle(@"Redirected on %@", @"History",
                                                                     [NSBundle bundleForClass:[self class]], nil),
@@ -432,8 +434,9 @@
                                      stringFromDate:record.createdAt]];
         } else {
             return [NSString
-                stringWithFormat:NSLocalizedStringFromTableInBundle(@"Allowed on %@", @"History",
+                stringWithFormat:NSLocalizedStringFromTableInBundle(@"%@ Allowed on %@", @"History",
                                                                     [NSBundle bundleForClass:[self class]], nil),
+                                 [record sourceIcon],
                                  [[NoRedirectHistoryViewController shortDateTimeFormatter]
                                      stringFromDate:record.createdAt]];
         }
@@ -483,8 +486,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    self.title =
-        NSLocalizedStringFromTableInBundle(@"Redirect History", @"Root", [NSBundle bundleForClass:self.class], nil);
+    self.title = NSLocalizedStringFromTableInBundle(@"History", @"Root", [NSBundle bundleForClass:self.class], nil);
 
     _clearButton = [[UIBarButtonItem alloc]
         initWithTitle:NSLocalizedStringFromTableInBundle(@"Clear", @"History", [NSBundle bundleForClass:self.class],

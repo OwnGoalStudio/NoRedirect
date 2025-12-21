@@ -12,7 +12,7 @@
 
 "As Hotspot Helper" = "As Hotspot Helper";
 
-"Preventing Auto-Run" = "Preventing Auto-Run";
+"Background Refresh & Prewarming" = "Background Refresh & Prewarming";
 
 "Block Applications" = "Block Applications";
 
@@ -42,6 +42,8 @@
 
 "Pause all blocks automatically in 10 seconds each time when application become active." = "Pause all blocks automatically in 10 seconds each time when application become active.";
 
+"Preventing Auto-Run" = "Preventing Auto-Run";
+
 "Safari" = "Safari";
 
 "Save" = "Save";
@@ -51,6 +53,8 @@
 "Simulation" = "Simulation";
 
 "Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL." = "Tell the caller that the redirect was handled successfully. This may cause the caller to stop trying other fallback methods to open the URL.";
+
+"To prevent apps from launching automatically in specific ways, enable the corresponding option. To manage background refresh settings in bulk, go to Settings → General → Background App Refresh." = "To prevent apps from launching automatically in specific ways, enable the corresponding option. To manage background refresh settings in bulk, go to Settings → General → Background App Refresh.";
 
 "“%@”" = "“%@”";
 

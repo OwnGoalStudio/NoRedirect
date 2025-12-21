@@ -97,7 +97,7 @@
 			<key>detail</key>
 			<string>NoRedirectHistoryViewController</string>
 			<key>label</key>
-			<string>Redirect History</string>
+			<string>View History</string>
 		</dict>
 		<dict>
 			<key>cell</key>

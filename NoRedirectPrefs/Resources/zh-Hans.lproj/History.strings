@@ -1,4 +1,4 @@
-"Allowed on %@" = "✅ 允许于 %@";
+"%@ Allowed on %@" = "%@ 允许于 %@";
 
 "Are you sure you want to clear the redirect history?" = "你确定要清除重定向历史记录吗？";
 
@@ -42,4 +42,4 @@
 
 "1 auto-run" = "1 次自启动";
 
-"%@ auto-run (Hotspot)" = "%@ 自启动 (Wi-Fi 助理)";
+"%@ auto-run" = "%@ 自启动";

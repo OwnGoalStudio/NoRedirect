@@ -87,6 +87,8 @@
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>Preventing Auto-Run</string>
+			<key>footerText</key>
+			<string>To prevent apps from launching automatically in specific ways, enable the corresponding option. To manage background refresh settings in bulk, go to Settings → General → Background App Refresh.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -99,6 +101,20 @@
 			<string>IsBlockedFromBeingLaunchedAsHotspotHelper</string>
 			<key>label</key>
 			<string>As Hotspot Helper</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsBlockedFromBeingPrewarmed</string>
+			<key>label</key>
+			<string>Background Refresh &amp; Prewarming</string>
 			<key>PostNotification</key>
 			<string>com.82flex.noredirectprefs/saved</string>
 		</dict>
