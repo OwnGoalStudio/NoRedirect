@@ -198,7 +198,7 @@ static void ReloadPrefs(void) {
     NSMutableSet *forbiddenOptimizeDestinations = [NSMutableSet set];
     for (NSString *key in settings) {
         if ([key hasPrefix:@"IsBlockedFromBeingOptimized/"] && [settings[key] boolValue]) {
-            NSString *appId = [key substringFromIndex:29];
+            NSString *appId = [key substringFromIndex:28];
             [forbiddenOptimizeDestinations addObject:appId];
         }
     }
