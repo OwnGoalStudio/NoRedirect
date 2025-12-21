@@ -10,9 +10,9 @@
 
 "App Store" = "App Store";
 
-"As Hotspot Helper" = "作为 Wi-Fi 助理";
+"Hotspot Helper" = "Wi-Fi 助理";
 
-"Background Refresh & Prewarming" = "后台刷新与预热";
+"Background Refresh" = "后台刷新";
 
 "Block Applications" = "拦截应用程序";
 
@@ -32,11 +32,15 @@
 
 "Delayed Cancellation" = "延迟解除";
 
+"Dyld Optimization" = "动态链接器优化";
+
 "Edit Custom Block…" = "编辑自定义拦截项…";
 
 "Edit Custom Bypass…" = "编辑自定义放行项…";
 
 "General" = "通用";
+
+"Launch Prewarming" = "启动预热";
 
 "Modified" = "已修改";
 

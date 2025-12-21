@@ -84,6 +84,7 @@
 @end
 
 @interface RBSProcessIdentity : NSObject
+@property(readonly, copy, nonatomic) NSString *embeddedApplicationIdentifier;
 @property(readonly, copy, nonatomic) NSString *xpcServiceIdentifier;
 + (instancetype)identityForXPCServiceIdentifier:(NSString *)arg1;
 @end
@@ -110,7 +111,9 @@ static NSSet<NSString *> *gForbiddenLaunchSourcesForAppStore = nil;
 static NSSet<NSString *> *gForbiddenLaunchSourcesForSafariServices = nil;
 
 static NSSet<NSString *> *gForbiddenHotspotHandlers = nil;
+static NSSet<NSString *> *gForbiddenBackgroundTaskHandlers = nil;
 static NSSet<NSString *> *gForbiddenPrewarmDestinations = nil;
+static NSSet<NSString *> *gForbiddenOptimizeDestinations = nil;
 
 static NSSet<NSString *> *gUseLenientModeSources = nil;
 static NSSet<NSString *> *gUseHandledSimulationSources = nil;
@@ -172,6 +175,16 @@ static void ReloadPrefs(void) {
     gForbiddenHotspotHandlers = [forbiddenHotspotHandlers copy];
     HBLogDebug(@"Forbidden Hotspot Handlers: %@", forbiddenHotspotHandlers);
 
+    NSMutableSet *forbiddenBackgroundTaskHandlers = [NSMutableSet set];
+    for (NSString *key in settings) {
+        if ([key hasPrefix:@"IsBlockedFromBeingLaunchedForBackgroundTask/"] && [settings[key] boolValue]) {
+            NSString *appId = [key substringFromIndex:44];
+            [forbiddenBackgroundTaskHandlers addObject:appId];
+        }
+    }
+    gForbiddenBackgroundTaskHandlers = [forbiddenBackgroundTaskHandlers copy];
+    HBLogDebug(@"Forbidden Background Task Handlers: %@", forbiddenBackgroundTaskHandlers);
+
     NSMutableSet *forbiddenPrewarmDestinations = [NSMutableSet set];
     for (NSString *key in settings) {
         if ([key hasPrefix:@"IsBlockedFromBeingPrewarmed/"] && [settings[key] boolValue]) {
@@ -181,6 +194,16 @@ static void ReloadPrefs(void) {
     }
     gForbiddenPrewarmDestinations = [forbiddenPrewarmDestinations copy];
     HBLogDebug(@"Forbidden Prewarm Destinations: %@", forbiddenPrewarmDestinations);
+
+    NSMutableSet *forbiddenOptimizeDestinations = [NSMutableSet set];
+    for (NSString *key in settings) {
+        if ([key hasPrefix:@"IsBlockedFromBeingOptimized/"] && [settings[key] boolValue]) {
+            NSString *appId = [key substringFromIndex:29];
+            [forbiddenOptimizeDestinations addObject:appId];
+        }
+    }
+    gForbiddenOptimizeDestinations = [forbiddenOptimizeDestinations copy];
+    HBLogDebug(@"Forbidden Optimize Destinations: %@", forbiddenOptimizeDestinations);
 
     NSMutableSet *forbiddenLaunchSourcesForAppStore = [NSMutableSet set];
     for (NSString *key in settings) {
@@ -300,8 +323,18 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
         return YES;
     }
 
-    if ([srcId isEqualToString:@"com.apple.dasd"] && [gForbiddenPrewarmDestinations containsObject:destId]) {
+    if ([srcId isEqualToString:@"com.apple.dasd"] && [gForbiddenBackgroundTaskHandlers containsObject:destId]) {
+        HBLogDebug(@"> [REJECT] %@ is forbidden from being launched for background tasks", destId);
+        return YES;
+    }
+
+    if ([srcId isEqualToString:@"com.apple.dasd.prewarm"] && [gForbiddenPrewarmDestinations containsObject:destId]) {
         HBLogDebug(@"> [REJECT] %@ is forbidden from being prewarmed", destId);
+        return YES;
+    }
+
+    if ([srcId isEqualToString:@"com.apple.dasd.optimize"] && [gForbiddenOptimizeDestinations containsObject:destId]) {
+        HBLogDebug(@"> [REJECT] %@ is forbidden from being optimized", destId);
         return YES;
     }
 
@@ -571,6 +604,51 @@ static NSBundle *NRUSupportBundle(void) {
 %hook RBProcessManager
 
 - (id)executeLaunchRequest:(RBSLaunchRequest *)request withError:(NSError **)errorPtr {
+    RBSProcessIdentity *identity = request.context.identity;
+
+    BOOL isDyldClosureGeneration = [[request description] containsString:@"DAS DYLD3 Closure Generation"];
+    BOOL isPrewarmLaunch = [[request description] containsString:@"DAS Prewarm launch"];
+
+    if (isDyldClosureGeneration || isPrewarmLaunch) {
+        NSString *fromAppId = nil;
+        if (isDyldClosureGeneration) {
+            fromAppId = @"com.apple.dasd.optimize";
+        } else if (isPrewarmLaunch) {
+            fromAppId = @"com.apple.dasd.prewarm";
+        }
+        if (!fromAppId) {
+            return %orig;
+        }
+
+        if (![identity respondsToSelector:@selector(embeddedApplicationIdentifier)]) {
+            return %orig;
+        }
+
+        NSString *toAppId = identity.embeddedApplicationIdentifier;
+        if (!toAppId) {
+            return %orig;
+        }
+
+        if (ShouldDeclineRequest(fromAppId, toAppId)) {
+            RecordRequest(fromAppId, toAppId, YES);
+
+            if (errorPtr) {
+                NSDictionary *userInfo = @{
+                    NSLocalizedDescriptionKey : @"Launch declined by No Redirect",
+                    NSLocalizedFailureReasonErrorKey :
+                        [NSString stringWithFormat:@"%@ is not allowed to launch %@.", fromAppId, toAppId],
+                };
+
+                *errorPtr = [NSError errorWithDomain:@"com.82flex.noredirect" code:1 userInfo:userInfo];
+            }
+
+            return nil;
+        }
+
+        RecordRequest(fromAppId, toAppId, NO);
+        return %orig;
+    }
+
     id process = %orig;
 
     RBSProcessBundle *bundle = request.context.hostProcess.handle.bundle;
@@ -580,7 +658,6 @@ static NSBundle *NRUSupportBundle(void) {
     }
 
     NSString *toAppId = nil;
-    RBSProcessIdentity *identity = request.context.identity;
     if (![identity respondsToSelector:@selector(xpcServiceIdentifier)]) {
         return process;
     }

@@ -98,9 +98,9 @@
 			<key>defaults</key>
 			<string>com.82flex.noredirectprefs</string>
 			<key>key</key>
-			<string>IsBlockedFromBeingLaunchedAsHotspotHelper</string>
+			<string>IsBlockedFromBeingLaunchedForBackgroundTask</string>
 			<key>label</key>
-			<string>As Hotspot Helper</string>
+			<string>Background Refresh</string>
 			<key>PostNotification</key>
 			<string>com.82flex.noredirectprefs/saved</string>
 		</dict>
@@ -114,7 +114,35 @@
 			<key>key</key>
 			<string>IsBlockedFromBeingPrewarmed</string>
 			<key>label</key>
-			<string>Background Refresh &amp; Prewarming</string>
+			<string>Launch Prewarming</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsBlockedFromBeingOptimized</string>
+			<key>label</key>
+			<string>Dyld Optimization</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsBlockedFromBeingLaunchedAsHotspotHelper</string>
+			<key>label</key>
+			<string>Hotspot Helper</string>
 			<key>PostNotification</key>
 			<string>com.82flex.noredirectprefs/saved</string>
 		</dict>

@@ -142,7 +142,7 @@
                 }
 
                 BOOL isAutorun = ([record.source isEqualToString:@"com.apple.configd"] ||
-                                  [record.source isEqualToString:@"com.apple.dasd"]);
+                                  [record.source hasPrefix:@"com.apple.dasd"]);
 
                 LSApplicationProxy *srcProxy;
                 if (isAutorun) {
@@ -240,7 +240,7 @@
                 }
 
                 BOOL isAutorun = ([record.source isEqualToString:@"com.apple.configd"] ||
-                                  [record.source isEqualToString:@"com.apple.dasd"]);
+                                  [record.source hasPrefix:@"com.apple.dasd"]);
 
                 NSString *srcId;
                 LSApplicationProxy *srcProxy;

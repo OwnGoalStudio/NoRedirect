@@ -10,9 +10,9 @@
 
 "App Store" = "App Store";
 
-"As Hotspot Helper" = "As Hotspot Helper";
+"Hotspot Helper" = "Hotspot Helper";
 
-"Background Refresh & Prewarming" = "Background Refresh & Prewarming";
+"Background Refresh" = "Background Refresh";
 
 "Block Applications" = "Block Applications";
 
@@ -32,11 +32,15 @@
 
 "Delayed Cancellation" = "Delayed Cancellation";
 
+"Dyld Optimization" = "Dyld Optimization";
+
 "Edit Custom Block…" = "Edit Custom Block…";
 
 "Edit Custom Bypass…" = "Edit Custom Bypass…";
 
 "General" = "General";
+
+"Launch Prewarming" = "Launch Prewarming";
 
 "Modified" = "Modified";
 
