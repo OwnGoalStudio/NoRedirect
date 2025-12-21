@@ -134,4 +134,8 @@
     }
 }
 
+- (BOOL)isTrusted {
+    return [self.source isEqualToString:@"com.apple.configd"];
+}
+
 @end

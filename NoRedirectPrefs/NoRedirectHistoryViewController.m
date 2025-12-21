@@ -141,11 +141,25 @@
                     continue;
                 }
 
-                LSApplicationProxy *srcProxy = cachedProxies[record.source];
-                if (!srcProxy) {
-                    srcProxy = [LSApplicationProxy applicationProxyForIdentifier:record.source];
-                    if (srcProxy) {
-                        cachedProxies[record.source] = srcProxy;
+                BOOL isBeingLaunchedAsHotspotHandler = [record.source isEqualToString:@"com.apple.configd"];
+                BOOL isAutorun = (isBeingLaunchedAsHotspotHandler);
+
+                LSApplicationProxy *srcProxy;
+                if (isAutorun) {
+                    srcProxy = cachedProxies[record.target];
+                    if (!srcProxy) {
+                        srcProxy = [LSApplicationProxy applicationProxyForIdentifier:record.target];
+                        if (srcProxy) {
+                            cachedProxies[record.target] = srcProxy;
+                        }
+                    }
+                } else {
+                    srcProxy = cachedProxies[record.source];
+                    if (!srcProxy) {
+                        srcProxy = [LSApplicationProxy applicationProxyForIdentifier:record.source];
+                        if (srcProxy) {
+                            cachedProxies[record.source] = srcProxy;
+                        }
                     }
                 }
                 if (!srcProxy || srcProxy.atl_isHidden || !srcProxy.nrt_nameToDisplay) {
@@ -168,8 +182,15 @@
                     continue;
                 }
 
-                specifier.name =
-                    [NSString stringWithFormat:@"%@  ❯  %@", srcProxy.nrt_nameToDisplay, targetProxy.nrt_nameToDisplay];
+                if (isBeingLaunchedAsHotspotHandler) {
+                    specifier.name = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(
+                                                                    @"%@ auto-run (Hotspot)", @"History",
+                                                                    [NSBundle bundleForClass:[self class]], nil),
+                                                                srcProxy.nrt_nameToDisplay];
+                } else {
+                    specifier.name = [NSString
+                        stringWithFormat:@"%@  ❯  %@", srcProxy.nrt_nameToDisplay, targetProxy.nrt_nameToDisplay];
+                }
 
                 [specifier setProperty:record forKey:@"associatedRecord"];
                 [specifier setProperty:srcProxy.nrt_nameToDisplay forKey:@"applicationName"];
@@ -205,18 +226,39 @@
             }
         } else if (selectedStatisticsType == 1) {
             NSMutableDictionary<NSString *, LSApplicationProxy *> *cachedProxies = [NSMutableDictionary dictionary];
+            NSMutableDictionary<NSString *, NSNumber *> *redirectionRequestsCountMapping =
+                [NSMutableDictionary dictionary];
+            NSMutableDictionary<NSString *, NSNumber *> *autorunRequestsCountMapping = [NSMutableDictionary dictionary];
             NSMutableDictionary<NSString *, NSNumber *> *requestsCountMapping = [NSMutableDictionary dictionary];
+
             NSArray<NoRedirectRecord *> *records = [NoRedirectRecord allRecords];
             for (NoRedirectRecord *record in records) {
                 if (!record.source || !record.target) {
                     continue;
                 }
 
-                LSApplicationProxy *srcProxy = cachedProxies[record.source];
-                if (!srcProxy) {
-                    srcProxy = [LSApplicationProxy applicationProxyForIdentifier:record.source];
-                    if (srcProxy) {
-                        cachedProxies[record.source] = srcProxy;
+                BOOL isBeingLaunchedAsHotspotHandler = [record.source isEqualToString:@"com.apple.configd"];
+                BOOL isAutorun = (isBeingLaunchedAsHotspotHandler);
+
+                NSString *srcId;
+                LSApplicationProxy *srcProxy;
+                if (isAutorun) {
+                    srcId = record.target;
+                    srcProxy = cachedProxies[record.target];
+                    if (!srcProxy) {
+                        srcProxy = [LSApplicationProxy applicationProxyForIdentifier:record.target];
+                        if (srcProxy) {
+                            cachedProxies[record.target] = srcProxy;
+                        }
+                    }
+                } else {
+                    srcId = record.source;
+                    srcProxy = cachedProxies[record.source];
+                    if (!srcProxy) {
+                        srcProxy = [LSApplicationProxy applicationProxyForIdentifier:record.source];
+                        if (srcProxy) {
+                            cachedProxies[record.source] = srcProxy;
+                        }
                     }
                 }
                 if (!srcProxy || srcProxy.atl_isHidden || !srcProxy.nrt_nameToDisplay) {
@@ -234,8 +276,16 @@
                     continue;
                 }
 
-                NSInteger previousCount = [requestsCountMapping[record.source] integerValue];
-                requestsCountMapping[record.source] = @(previousCount + 1);
+                NSInteger previousCount = [requestsCountMapping[srcId] integerValue];
+                requestsCountMapping[srcId] = @(previousCount + 1);
+
+                if (isAutorun) {
+                    previousCount = [autorunRequestsCountMapping[srcId] integerValue];
+                    autorunRequestsCountMapping[srcId] = @(previousCount + 1);
+                } else {
+                    previousCount = [redirectionRequestsCountMapping[srcId] integerValue];
+                    redirectionRequestsCountMapping[srcId] = @(previousCount + 1);
+                }
 
                 if (record.declined) {
                     declinedCount++;
@@ -261,6 +311,11 @@
 
             NSMutableArray<PSSpecifier *> *groupedSpecifiers = [NSMutableArray array];
             for (LSApplicationProxy *proxy in requestsProxies) {
+                NSString *appId = proxy.bundleIdentifier;
+                if (!appId) {
+                    continue;
+                }
+
                 PSSpecifier *specifier = [self createSpecifierForApplicationProxy:proxy];
                 if (!specifier) {
                     continue;
@@ -268,8 +323,11 @@
 
                 specifier.name = [NSString stringWithFormat:@"%@", proxy.nrt_nameToDisplay];
 
-                [specifier setProperty:requestsCountMapping[proxy.bundleIdentifier] forKey:@"associatedCount"];
+                [specifier setProperty:requestsCountMapping[appId] forKey:@"associatedCount"];
+                [specifier setProperty:redirectionRequestsCountMapping[appId] forKey:@"associatedRedirectionCount"];
+                [specifier setProperty:autorunRequestsCountMapping[appId] forKey:@"associatedAutorunCount"];
                 [specifier setProperty:proxy.nrt_nameToDisplay forKey:@"applicationName"];
+
                 [groupedSpecifiers addObject:specifier];
             }
 
@@ -314,22 +372,22 @@
     }
     NSString *totalDescription = nil;
     if (totalCount == 1) {
-        totalDescription =
-            NSLocalizedStringFromTableInBundle(@"1 request", @"History", [NSBundle bundleForClass:[self class]], nil);
+        totalDescription = NSLocalizedStringFromTableInBundle(@"1 redirection or auto-run request", @"History",
+                                                              [NSBundle bundleForClass:[self class]], nil);
     } else {
-        totalDescription =
-            [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld requests", @"History",
-                                                                          [NSBundle bundleForClass:[self class]], nil),
-                                       (long)totalCount];
+        totalDescription = [NSString
+            stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld redirection or auto-run requests", @"History",
+                                                                [NSBundle bundleForClass:[self class]], nil),
+                             (long)totalCount];
     }
     if (declinedCount > 0) {
         NSString *declinedDescription = nil;
         if (declinedCount == 1) {
-            declinedDescription = NSLocalizedStringFromTableInBundle(@"1 request", @"History",
+            declinedDescription = NSLocalizedStringFromTableInBundle(@"1 redirection or auto-run request", @"History",
                                                                      [NSBundle bundleForClass:[self class]], nil);
         } else {
             declinedDescription = [NSString
-                stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld requests", @"History",
+                stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld redirection or auto-run requests", @"History",
                                                                     [NSBundle bundleForClass:[self class]], nil),
                                  (long)declinedCount];
         }
@@ -366,26 +424,58 @@
                                                                     [NSBundle bundleForClass:[self class]], nil),
                                  [[NoRedirectHistoryViewController shortDateTimeFormatter]
                                      stringFromDate:record.createdAt]];
-        } else {
+        } else if (!record.isTrusted) {
             return [NSString
                 stringWithFormat:NSLocalizedStringFromTableInBundle(@"Redirected on %@", @"History",
                                                                     [NSBundle bundleForClass:[self class]], nil),
                                  [[NoRedirectHistoryViewController shortDateTimeFormatter]
                                      stringFromDate:record.createdAt]];
-        }
-    } else {
-        NSInteger associatedCount = [[specifier propertyForKey:@"associatedCount"] integerValue];
-        if (associatedCount == 0) {
-            return nil;
-        }
-        if (associatedCount == 1) {
-            return NSLocalizedStringFromTableInBundle(@"1 request", @"History", [NSBundle bundleForClass:[self class]],
-                                                      nil);
         } else {
             return [NSString
-                stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld requests", @"History",
+                stringWithFormat:NSLocalizedStringFromTableInBundle(@"Allowed on %@", @"History",
                                                                     [NSBundle bundleForClass:[self class]], nil),
-                                 (long)associatedCount];
+                                 [[NoRedirectHistoryViewController shortDateTimeFormatter]
+                                     stringFromDate:record.createdAt]];
+        }
+    } else {
+        NSInteger associatedRedirectionCount = [[specifier propertyForKey:@"associatedRedirectionCount"] integerValue];
+        NSInteger associatedAutorunCount = [[specifier propertyForKey:@"associatedAutorunCount"] integerValue];
+        if (associatedRedirectionCount > 1 && associatedAutorunCount > 1) {
+            return [NSString
+                stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld redirections and %ld auto-runs", @"History",
+                                                                    [NSBundle bundleForClass:[self class]], nil),
+                                 (long)associatedRedirectionCount, (long)associatedAutorunCount];
+        } else if (associatedRedirectionCount > 1 && associatedAutorunCount == 1) {
+            return [NSString
+                stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld redirections and 1 auto-run", @"History",
+                                                                    [NSBundle bundleForClass:[self class]], nil),
+                                 (long)associatedRedirectionCount];
+        } else if (associatedRedirectionCount == 1 && associatedAutorunCount > 1) {
+            return [NSString
+                stringWithFormat:NSLocalizedStringFromTableInBundle(@"1 redirection and %ld auto-runs", @"History",
+                                                                    [NSBundle bundleForClass:[self class]], nil),
+                                 (long)associatedAutorunCount];
+        } else if (associatedRedirectionCount == 1 && associatedAutorunCount == 1) {
+            return NSLocalizedStringFromTableInBundle(@"1 redirection and 1 auto-run", @"History",
+                                                      [NSBundle bundleForClass:[self class]], nil);
+        } else if (associatedRedirectionCount > 1 && associatedAutorunCount == 0) {
+            return [NSString
+                stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld redirections", @"History",
+                                                                    [NSBundle bundleForClass:[self class]], nil),
+                                 (long)associatedRedirectionCount];
+        } else if (associatedRedirectionCount == 0 && associatedAutorunCount > 1) {
+            return [NSString
+                stringWithFormat:NSLocalizedStringFromTableInBundle(@"%ld auto-runs", @"History",
+                                                                    [NSBundle bundleForClass:[self class]], nil),
+                                 (long)associatedAutorunCount];
+        } else if (associatedRedirectionCount == 1 && associatedAutorunCount == 0) {
+            return NSLocalizedStringFromTableInBundle(@"1 redirection", @"History",
+                                                      [NSBundle bundleForClass:[self class]], nil);
+        } else if (associatedRedirectionCount == 0 && associatedAutorunCount == 1) {
+            return NSLocalizedStringFromTableInBundle(@"1 auto-run", @"History", [NSBundle bundleForClass:[self class]],
+                                                      nil);
+        } else {
+            return nil;
         }
     }
 }

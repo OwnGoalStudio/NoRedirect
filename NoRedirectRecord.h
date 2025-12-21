@@ -8,6 +8,8 @@
 @property(nonatomic, copy, readonly) NSDate *createdAt;
 
 - (instancetype)init NS_UNAVAILABLE;
+- (BOOL)isTrusted;
+
 + (NSArray<NoRedirectRecord *> *)allRecords;
 + (NSInteger)numberOfRecords;
 + (void)insertRecord:(BOOL)declined source:(NSString *)sourceIdentifier target:(NSString *)targetIdentifier;

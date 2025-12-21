@@ -1,3 +1,5 @@
+"Allowed on %@" = "✅ 允许于 %@";
+
 "Are you sure you want to clear the redirect history?" = "你确定要清除重定向历史记录吗？";
 
 "By Date" = "按日期";
@@ -6,11 +8,11 @@
 
 "Clear" = "清除";
 
-"Declined on %@" = "拦截于 %@";
+"Declined on %@" = "🚫 拦截于 %@";
 
 "Home Screen" = "主屏幕";
 
-"Redirected on %@" = "重定向于 %@";
+"Redirected on %@" = "➡️ 重定向于 %@";
 
 "Settings of “%@” cannot be modified." = "无法修改 “%@” 的设置。";
 
@@ -20,6 +22,24 @@
 
 "No Redirect has recognized %@ and declined %@ for you since the last boot." = "自上次启动以来，禁字诀已为你识别 %@，并拦截其中的 %@。";
 
-"1 request" = "1 个重定向请求";
+"1 redirection or auto-run request" = "1 次重定向或自启动请求";
 
-"%ld requests" = "%ld 个重定向请求";
+"%ld redirection or auto-run requests" = "%ld 次重定向或自启动请求";
+
+"%ld redirections and %ld auto-runs" = "%ld 次重定向和 %ld 次自启动";
+
+"%ld redirections and 1 auto-run" = "%ld 次重定向和 1 次自启动";
+
+"1 redirection and %ld auto-runs" = "1 次重定向和 %ld 次自启动";
+
+"1 redirection and 1 auto-run" = "1 次重定向和 1 次自启动";
+
+"%ld redirections" = "%ld 次重定向";
+
+"%ld auto-runs" = "%ld 次自启动";
+
+"1 redirection" = "1 次重定向";
+
+"1 auto-run" = "1 次自启动";
+
+"%@ auto-run (Hotspot)" = "%@ 自启动 (Wi-Fi 助理)";
