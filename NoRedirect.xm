@@ -109,6 +109,8 @@ static NSSet<NSString *> *gForbiddenLaunchDestinations = nil;
 static NSSet<NSString *> *gForbiddenLaunchSourcesForAppStore = nil;
 static NSSet<NSString *> *gForbiddenLaunchSourcesForSafariServices = nil;
 
+static NSSet<NSString *> *gForbiddenHotspotHandlers = nil;
+
 static NSSet<NSString *> *gUseLenientModeSources = nil;
 static NSSet<NSString *> *gUseHandledSimulationSources = nil;
 
@@ -158,6 +160,16 @@ static void ReloadPrefs(void) {
     }
     gForbiddenLaunchDestinations = [forbiddenLaunchDestinations copy];
     HBLogDebug(@"Forbidden Launch Destinations: %@", forbiddenLaunchDestinations);
+
+    NSMutableSet *forbiddenHotspotHandlers = [NSMutableSet set];
+    for (NSString *key in settings) {
+        if ([key hasPrefix:@"IsBlockedFromBeingLaunchedAsHotspotHelper/"] && [settings[key] boolValue]) {
+            NSString *appId = [key substringFromIndex:42];
+            [forbiddenHotspotHandlers addObject:appId];
+        }
+    }
+    gForbiddenHotspotHandlers = [forbiddenHotspotHandlers copy];
+    HBLogDebug(@"Forbidden Hotspot Handlers: %@", forbiddenHotspotHandlers);
 
     NSMutableSet *forbiddenLaunchSourcesForAppStore = [NSMutableSet set];
     for (NSString *key in settings) {
@@ -269,6 +281,11 @@ static BOOL ShouldDeclineRequest(NSString *srcId, NSString *destId) {
 
     if ([gForbiddenLaunchSources containsObject:srcId]) {
         HBLogDebug(@"> [REJECT] %@ is forbidden from launching others", srcId);
+        return YES;
+    }
+
+    if ([srcId isEqualToString:@"com.apple.configd"] && [gForbiddenHotspotHandlers containsObject:destId]) {
+        HBLogDebug(@"> [REJECT] %@ is forbidden from being launched as Hotspot Helper", destId);
         return YES;
     }
 
@@ -406,6 +423,8 @@ static NSBundle *NRUSupportBundle(void) {
 
     NSString *fromAppId = nil;
     NSString *fromAppName = nil;
+    NSString *fromProcessName = nil;
+
     SBApplicationSceneEntity *fromEntity = request.fromApplicationSceneEntities.anyObject;
     if (fromEntity) {
         id fromAction = fromEntity.actions.anyObject;
@@ -421,7 +440,7 @@ static NSBundle *NRUSupportBundle(void) {
         fromAppId = fromEntity.application.bundleIdentifier;
         fromAppName = fromEntity.application.displayName;
     } else {
-        NSString *fromProcessName = request.originatingProcess.name;
+        fromProcessName = request.originatingProcess.name;
         if (isFromBreadcrumb || [fromProcessName isEqualToString:@"lsd"]) {
             SBLayoutElement *fromElement = [request.applicationContext.previousLayoutState elementWithRole:1];
             fromAppId = fromElement.uniqueIdentifier;
@@ -456,8 +475,13 @@ static NSBundle *NRUSupportBundle(void) {
         toAppName = toAppProxy.localizedName;
     }
 
-    if (ShouldDeclineRequest(fromAppId, toAppId)) {
-        RecordRequest(fromAppId, toAppId, YES);
+    NSString *sourceId = fromAppId;
+    if ([fromProcessName isEqualToString:@"configd"]) {
+        sourceId = @"com.apple.configd";
+    }
+
+    if (ShouldDeclineRequest(sourceId, toAppId)) {
+        RecordRequest(sourceId, toAppId, YES);
 
         if (gBannerEnabled && fromAppName && toAppName) {
             NSString *primaryTitle =
@@ -475,7 +499,7 @@ static NSBundle *NRUSupportBundle(void) {
             }
         }
 
-        if ([gUseHandledSimulationSources containsObject:fromAppId]) {
+        if ([gUseHandledSimulationSources containsObject:sourceId]) {
             BOOL isStoreKitUI = [toAppId isEqualToString:@"com.apple.ios.StoreKitUIService"];
             if (isStoreKitUI) {
                 [request declineWithReason:@"No Redirect (Handled)"];
@@ -496,7 +520,7 @@ static NSBundle *NRUSupportBundle(void) {
         return NO;
     }
 
-    RecordRequest(fromAppId, toAppId, NO);
+    RecordRequest(sourceId, toAppId, NO);
     return %orig;
 }
 

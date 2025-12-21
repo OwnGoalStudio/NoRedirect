@@ -86,6 +86,26 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
+			<string>Autorun</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.82flex.noredirectprefs</string>
+			<key>key</key>
+			<string>IsBlockedFromBeingLaunchedAsHotspotHelper</string>
+			<key>label</key>
+			<string>As Hotspot Helper</string>
+			<key>PostNotification</key>
+			<string>com.82flex.noredirectprefs/saved</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
 			<string>Common Blocks</string>
 		</dict>
 		<dict>
