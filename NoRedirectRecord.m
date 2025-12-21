@@ -2,9 +2,11 @@
 
 #import <Foundation/Foundation.h>
 #import <HBLog.h>
-#import <libroot.h>
 #import <QuartzCore/QuartzCore.h>
+#import <libroot.h>
 #import <sqlite3.h>
+#import <sys/sysctl.h>
+#import <sys/time.h>
 
 @implementation NoRedirectRecord
 
@@ -100,12 +102,22 @@
     }
 }
 
+static NSTimeInterval UnixBootTimestamp(void) {
+    struct timeval boottime;
+    size_t size = sizeof(boottime);
+    int mib[2] = {CTL_KERN, KERN_BOOTTIME};
+    if (sysctl(mib, 2, &boottime, &size, NULL, 0) != 0) {
+        return 0;
+    }
+    return (NSTimeInterval)boottime.tv_sec + (NSTimeInterval)boottime.tv_usec / 1e6;
+}
+
 + (void)clearAllRecordsBeforeBoot {
     sqlite3 *db = [self sharedDatabase:NO];
     if (!db) {
         return;
     }
-    CFTimeInterval bootTime = CACurrentMediaTime();
+    NSTimeInterval bootTime = UnixBootTimestamp();
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, "DELETE FROM records WHERE created_at < ?;", -1, &stmt, NULL) == SQLITE_OK) {
         sqlite3_bind_int(stmt, 1, (int)bootTime);
