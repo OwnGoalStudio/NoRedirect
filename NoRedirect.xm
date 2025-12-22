@@ -87,6 +87,9 @@
 @property(readonly, copy, nonatomic) NSString *embeddedApplicationIdentifier;
 @property(readonly, copy, nonatomic) NSString *xpcServiceIdentifier;
 + (instancetype)identityForXPCServiceIdentifier:(NSString *)arg1;
++ (instancetype)identityForEmbeddedApplicationIdentifier:(NSString *)arg1 euid:(uid_t)arg2;
++ (instancetype)identityForEmbeddedApplicationIdentifier:(NSString *)arg1;
++ (instancetype)identityOfCurrentProcess;
 @end
 
 @interface RBSLaunchContext : NSObject
@@ -606,6 +609,7 @@ static NSBundle *NRUSupportBundle(void) {
 - (id)executeLaunchRequest:(RBSLaunchRequest *)request withError:(NSError **)errorPtr {
     RBSProcessIdentity *identity = request.context.identity;
 
+    HBLogDebug(@"executeLaunchRequest: %@ with identity: %@", [request description], identity);
     BOOL isDyldClosureGeneration = [[request description] containsString:@"DAS DYLD3 Closure Generation"];
     BOOL isPrewarmLaunch = [[request description] containsString:@"DAS Prewarm launch"];
 
@@ -632,17 +636,11 @@ static NSBundle *NRUSupportBundle(void) {
         if (ShouldDeclineRequest(fromAppId, toAppId)) {
             RecordRequest(fromAppId, toAppId, YES);
 
-            if (errorPtr) {
-                NSDictionary *userInfo = @{
-                    NSLocalizedDescriptionKey : @"Launch declined by No Redirect",
-                    NSLocalizedFailureReasonErrorKey :
-                        [NSString stringWithFormat:@"%@ is not allowed to launch %@.", fromAppId, toAppId],
-                };
+            RBSProcessIdentity *fakeIdentity =
+                [%c(RBSProcessIdentity) identityForEmbeddedApplicationIdentifier:@"com.apple.MobileSMS"];
+            request.context.identity = fakeIdentity;
 
-                *errorPtr = [NSError errorWithDomain:@"com.82flex.noredirect" code:1 userInfo:userInfo];
-            }
-
-            return nil;
+            return %orig;
         }
 
         RecordRequest(fromAppId, toAppId, NO);
